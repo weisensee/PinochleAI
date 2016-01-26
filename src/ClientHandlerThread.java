@@ -6,7 +6,7 @@ import java.net.Socket;
  * ClientHandlerThread.java
  * Lucas Weisensee
  *
- * Handles a new Client's connection to the game's Server
+ * Handles a new Client's connection to the Game's Server
  */
 public class ClientHandlerThread extends Thread {
     private Socket socket = null;

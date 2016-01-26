@@ -6,7 +6,7 @@ import java.net.Socket;
  * Client.java
  * Lucas Weisensee
  *
- * Connects to AiServer and plays a game
+ * Connects to AiServer and plays a Game
  */
 
 public abstract class Client {
@@ -59,7 +59,7 @@ public abstract class Client {
 //        playCard(toPlay);
     }
 
-    // Plays the given card in the current game
+    // Plays the given card in the current Game
     public void playCard(Card toPlay) {
 
     }

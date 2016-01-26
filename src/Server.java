@@ -2,11 +2,11 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 /**
- * Server.java: game Server for card playing AI
+ * Server.java: Game Server for card playing AI
  * Lucas Weisensee
  *
  * Manages active games
- * Connects players to preferred game
+ * Connects players to preferred Game
  */
 public class Server {
     // Port number for Server to listen on
