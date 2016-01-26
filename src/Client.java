@@ -22,8 +22,7 @@ public abstract class Client {
     public void run(int port) {
         // set port for Client to use
         PORT_NUMBER = port;
-
-
+        
         System.out.println("Starting Client on port:" + PORT_NUMBER);
 
         String string = "testing1234";
