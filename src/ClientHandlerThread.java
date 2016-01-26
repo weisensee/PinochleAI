@@ -16,7 +16,7 @@ public class ClientHandlerThread extends Thread {
     }
 
     public void run() {
-        System.out.print("new thread started");
+        System.out.println("new thread started");
 
         try {
             // initiate stream readers
@@ -26,7 +26,7 @@ public class ClientHandlerThread extends Thread {
             // read from stream
             BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
             String string2 = in.readLine();
-            System.out.println(string2);
+            System.out.println("Message from Client:" + string2);
 
             // write to stream
             PrintWriter printWriter = new PrintWriter(outputStream);

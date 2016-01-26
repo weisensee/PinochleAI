@@ -22,7 +22,7 @@ public abstract class Client {
     public void run(int port) {
         // set port for Client to use
         PORT_NUMBER = port;
-        
+
         System.out.println("Starting Client on port:" + PORT_NUMBER);
 
         String string = "testing1234";
@@ -31,7 +31,7 @@ public abstract class Client {
         try {
 
             // bind socket
-            Socket server = new Socket(InetAddress.getByName("127.0.0.1"), PORT_NUMBER);
+            Socket server = new Socket(InetAddress.getByName("0.0.0.0"), PORT_NUMBER);
 
             // initiate stream readers
             DataInputStream inputStream = new DataInputStream(server.getInputStream());

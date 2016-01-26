@@ -27,11 +27,11 @@ public class Server {
 
         // Listen for new Client connections
         try {
+            // create Server socket and accept connection
+            ServerSocket serverSocket = new ServerSocket(PORT_NUMBER);
+
             // Listen until an error or Server is closed
             while (true) {
-                // create Server socket and accept connection
-                ServerSocket serverSocket = new ServerSocket(PORT_NUMBER);
-
                 // spin off thread to handle new Client
                 new ClientHandlerThread(serverSocket.accept()).start();
 
