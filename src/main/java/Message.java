@@ -14,6 +14,8 @@
  *      card played
  *
  */
+
+// TODO: implement message parsing to and from JSON
 public class Message {
     public Message() {
 

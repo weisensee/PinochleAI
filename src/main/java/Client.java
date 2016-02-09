@@ -183,6 +183,7 @@ public abstract class Client {
     public void leaveGame() {
     }
 
+    // TODO: review Game.java and implement dealt hand catcher here THEN TEST!
     // collect cards from server/dealer
     public void getDealtHand() {
         // wait for server to send the game data, dealt cards, etc

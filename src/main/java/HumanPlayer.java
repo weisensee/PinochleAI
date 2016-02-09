@@ -89,7 +89,8 @@ public class HumanPlayer extends Client {
 
     // returns the player's next play
     public Card getNextPlay() {
-        return new Card();
+        // TODO: show the players hand, ask them which card they want to play
+        return new Card(-1);
     }
 
 

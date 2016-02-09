@@ -128,7 +128,7 @@ public class Game {
 //                PLAYERS[i].send
     }
 
-
+    // TODO: test that this works/is dealing out cards to players
     // Deal out cards
     // notify players that game is starting by dealing out hands
     private void dealCards() {

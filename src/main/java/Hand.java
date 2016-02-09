@@ -16,4 +16,6 @@ public class Hand {
         cardsInHand = new ArrayList<Card>(cardsDealt);
     }
 
+    // TODO: impement function to return string of hand for printing
+
 }

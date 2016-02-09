@@ -19,6 +19,8 @@ public class Card {
         value = _value;
     }
 
+    // TODO: return appropriate string to display card suit and value
+    // TODO: implement getSuit and getValue helper functions
     // returns the string representation of the given card
     public String getString() {
         return Integer.toString(value);
