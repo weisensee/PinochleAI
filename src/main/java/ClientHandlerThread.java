@@ -7,7 +7,7 @@ import org.json.simple.JSONObject;
 
 /**
  * ClientHandlerThread.java
- * Lucas Weisensee
+ * Luke Weisensee
  *
  * Handles a new Client's connection to the Game's Server
  */
@@ -66,19 +66,19 @@ public class ClientHandlerThread extends Thread {
         printWriter.println(gameListString);
         printWriter.flush();
 
-        // TODO: send and recieve JSON object from client, parse below and return apropriate int
-        // Get answer from client
-
+        // Get JSONObject String of Player's Profile from client
         try {
-            // get answer (create or join existing)
             BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
-            answer = Integer.parseInt(in.readLine());
-            System.out.println("Client game choice:" + answer);
+            String jsonString = in.readLine();
+            System.out.println("JSON RECEIVED::" + jsonString);
+            PLAYER.setPlayerProfile(jsonString);
 
         } catch (IOException e) {   // catch reading IO error
             System.err.println("ERROR reading join/create answer from client" + e);
             e.printStackTrace();
         }
+
+        System.out.println("Client game choice:" + answer);
 
         // check that answer is valid (all valid choices must be positive (join game), or == 0 (create new)
         if (answer < 0)
@@ -129,7 +129,7 @@ public class ClientHandlerThread extends Thread {
         Game currentGame = new Game(newId, joiningGameQueue);
 
         // update players game id
-        PLAYER.GAME_ID = newId;
+        PLAYER.setGameId(newId);
         getNameAndId();
 
         // add player to game joining queue

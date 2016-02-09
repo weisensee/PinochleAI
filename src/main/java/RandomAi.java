@@ -1,3 +1,5 @@
+import java.util.HashMap;
+
 /*
  * RandomAi.java
  * Lucas Weisensee
@@ -11,6 +13,10 @@ public class RandomAi extends AiPlayer {
     public static void main(String[] args) {
         RandomAi Player = new RandomAi();
         Player.run(DEFAULT_PORT);
+    }
+
+    public int pickGameToJoin(HashMap gameList) { // return the clients choice of game to join
+        return 0;
     }
     public void placeMaxBid(){}                // bid on hand by placing max bid
     public int pickGameToJoin(String query) {   // return the clients choice of game to join

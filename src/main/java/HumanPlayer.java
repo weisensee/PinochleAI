@@ -1,4 +1,11 @@
+import org.json.simple.JSONObject;
+import org.json.simple.*;
+import org.json.simple.JSONValue;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -33,14 +40,12 @@ public class HumanPlayer extends Client {
          // Query player for name, echo what they input
          System.out.println("Please enter the name you'd like to use below:");
          Scanner cin = new Scanner(System.in);
-         PROFILE.NAME = cin.nextLine();
-         System.out.println("New name saved: " + PROFILE.NAME);
+         PROFILE.setName(cin.nextLine());       // update plater's profile data
+         System.out.println("New name saved: " + PROFILE.getName());
 
          // Pick a userID for the current player
-         // TODO: setup some kind of database for userid's to ensure no duplicates
-         Random r = new Random();        // currently returns a randomly generated ID
-         PROFILE.ID = r.nextInt(99999);    // adds one to avoid returning 0
-
+         PROFILE.setId(getNewId());       // adds one to avoid returning 0
+         System.out.println(PROFILE.getName() + " got new ID: " + PROFILE.getId());
      }
 
 
@@ -62,17 +67,22 @@ public class HumanPlayer extends Client {
      }
 
      // return the clients choice of game to join
-     public int pickGameToJoin(String query) {
-         // Ask the player which game they'd like to join
-         System.out.println("FROM SERVER:" + query);
-         System.out.println("Please enter which game you'd like to join or 0 to create a new one.");
+     public int pickGameToJoin(HashMap gameList) {
+         // parse and print number of available games
+         int gameCount = Integer.parseInt(gameList.get("Active Game Count").toString());
+         System.out.println("Active Game Count is: " + gameCount);
 
-         // get the player's choice
-         Scanner in = new Scanner(System.in);
-         int answer = in.nextInt();
+         int answer = -1;
+         while (!isAvailableGame(answer, gameList)) {
+             // Ask the player which game they'd like to join
+             System.out.println("Please enter the ID number of the game you'd like to join");
+
+             // get the player's choice
+             Scanner in = new Scanner(System.in);
+             answer = in.nextInt();
+         }
 
 
-         // TODO: check that the players choice is a viable one (in the list of available games)
          System.out.println("Returning: " + answer + " as player's choice");
          return answer;
      }

@@ -1,4 +1,5 @@
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
@@ -22,8 +23,9 @@ public class Game {
     private String NAME;                    // this Game's name
     private int GAME_ID;                    // Game's unique ID # (> 0)
     private PlayerProfile[] PLAYERS;        // clients in this Game
+    private Hand[] HANDS;            // cards each player holds
     private int[] SCORES;                   // teams scores
-    private BlockingQueue joiningGameQueue;  // blocking queue of players waiting to join another game
+    private BlockingQueue joiningGameQueue; // blocking queue of players waiting to join another game
 
     // Constructor, takes the new game's ID
     public Game(int gameId, BlockingQueue joiningQueue) {
@@ -42,6 +44,8 @@ public class Game {
 
         // save blocking queue address
         this.joiningGameQueue = joiningQueue;
+
+        // initialize players hands?
     }
 
     // adds player to game and removes them from the queue
@@ -49,7 +53,7 @@ public class Game {
         // if game is full, print and return error
         if (1 == gameFull()) {
             System.err.println("ERROR: unable to add player, game full. gameID:" + GAME_ID +
-                    " Player:" + toAdd.NAME + " ID:" + toAdd.ID);
+                    " Player:" + toAdd.getName() + " ID:" + toAdd.getId());
             return -1;
         }
 
@@ -83,9 +87,9 @@ public class Game {
                     i += QUEUE_MAX;                 // quit searching
 
                 else
-                    if (GAME_ID == queueSnapshot[i].GAME_ID) {  // if the player is trying to join this game
-                        addPlayer(queueSnapshot[i]);            // add them to this game
-                        if (1 == gameFull())                    // if the game is full, stop looking for new players
+                    if (GAME_ID == queueSnapshot[i].getGameId()) {  // if the player is trying to join this game
+                        addPlayer(queueSnapshot[i]);                // add them to this game
+                        if (1 == gameFull())                        // if the game is full, stop looking for new players
                             break;
                     }
             }
@@ -116,8 +120,35 @@ public class Game {
         return 1;
     }
 
+    // Send String argument to all active players
+    public void sendToAllPlayers(String toSend) {
+        // for each current player
+//        for (int i = 0; i < MAX_PLAYERS; i++)
+//            if (PLAYERS[i] != null)
+//                PLAYERS[i].send
+    }
+
+
     // Deal out cards
+    // notify players that game is starting by dealing out hands
     private void dealCards() {
+        // initialize new deck of cards
+        PinochleDeck deck = new PinochleDeck();
+
+        // shuffle and deal cards locally
+        deck.shuffle();
+
+        // save then send each player's hand
+        for(int i = 0; i < MAX_PLAYERS; i++) {
+            // save hand locally
+            HANDS[i] = deck.getHand(i);
+
+            // send dealt hands
+            Message handDealt = new Message();
+            handDealt.handDealt(HANDS[i]);
+            PLAYERS[i].sendMsg(handDealt);
+        }
+
 
     }
 
