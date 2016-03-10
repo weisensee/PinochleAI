@@ -19,6 +19,17 @@ public class Card {
         value = _value;
     }
 
+    // return the int value of card
+    public int getInt() {
+        return value;
+    }
+
+    // return the char value of the card
+    // TODO: setup char/int conversion
+    public char getChar() {
+        return (char)value;
+    }
+
     // TODO: return appropriate string to display card suit and value
     // TODO: implement getSuit and getValue helper functions
     // returns the string representation of the given card

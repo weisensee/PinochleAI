@@ -1,5 +1,7 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -16,8 +18,9 @@ public class ClientHandlerThread extends Thread {
     public Socket clientSocket;             // thread's client's socket
     public DataInputStream inputStream;     // input stream from client
     public DataOutputStream outputStream;   // output stream to client
-    public BlockingQueue joiningGameQueue; // blocking queue of players waiting to join another game
+    public BlockingQueue joiningGameQueue;  // blocking queue of players waiting to join another game
     public BlockingQueue activeGames;       // blocking queue of active games
+//    public Game GAME;                       // local game that is being played
 
     public ClientHandlerThread(Socket newClient, BlockingQueue joiningQueue, BlockingQueue gameList) {
         super("ClientHandlerThread");
@@ -38,8 +41,9 @@ public class ClientHandlerThread extends Thread {
     // Queries client for game choice and connects them to that game
     public void run() {
         System.out.println("new thread started");
-        PLAYER.SOCKET = clientSocket;   // setup current player with the new socket
         setupClientStreamReaders();     // initiates stream readers for communicating with client
+        // TODO: decide when to start using PLAYER.getSocket() and then quit using 'clientSocket'
+//        PLAYER.SOCKET = clientSocket;   // setup current player with the new socket
 
         // query client for choice (create or join)
         int answer = joinOrCreateQuery();
@@ -53,32 +57,52 @@ public class ClientHandlerThread extends Thread {
             joinGame(answer);
     }
 
+    // Prints String argument to output stream and flushes stream
+    // TODO: have the same communication protocol in Client and Client handler!
+    private void printToOutputStream(String toPrint) {
+        PrintWriter printWriter = new PrintWriter(outputStream);
+        printWriter.println(toPrint);
+        printWriter.flush();
+    }
+
     // Queries client: join existing game or create a new one
+    // Sets player profile info TODO: think about setting this up as separate methor or renaming
     // Returns: game ID of answer or 0 for create new
     public int joinOrCreateQuery() {
         int answer = -1;    // initialize to negative, all game IDs are >0
+        Message gameListMsg = new Message();
 
-        // generate and active game list
-        String gameListString = generateGameList();
-
-        // Send JSON object to client as string
-        PrintWriter printWriter = new PrintWriter(outputStream);
-        printWriter.println(gameListString);
-        printWriter.flush();
+        // generate and and send the active game list
+        gameListMsg.createGameListMessage(getActiveGameArray());
+        printToOutputStream(gameListMsg.getString());
 
         // Get JSONObject String of Player's Profile from client
         try {
+            // read in message from inputStream
             BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
-            String jsonString = in.readLine();
-            System.out.println("JSON RECEIVED::" + jsonString);
-            PLAYER.setPlayerProfile(jsonString);
+            Message gameChoice = new Message(in.readLine());
+
+            // TODO: remove debug statement:
+            System.out.println("JSON RECEIVED::" + gameChoice.print());
+
+            // if game choice message is invalid throw error and quit
+            // TODO: respond appropriately when player disconnects, launch a disconnect function?
+            if (!gameChoice.isValidJson())
+                throw new IOException("Null message received instead of game choice, player disconnected?");
+
+            // Set local player profile from message
+            PLAYER = gameChoice.getOwner();
+
+            // get game choice from message
+            answer = gameChoice.getGameId();
 
         } catch (IOException e) {   // catch reading IO error
             System.err.println("ERROR reading join/create answer from client" + e);
             e.printStackTrace();
         }
 
-        System.out.println("Client game choice:" + answer);
+        // TODO: remove debug statement:
+        System.out.println("Client game choice: " + answer);
 
         // check that answer is valid (all valid choices must be positive (join game), or == 0 (create new)
         if (answer < 0)
@@ -87,25 +111,12 @@ public class ClientHandlerThread extends Thread {
     }
 
     // generates a JSONObject containing the list of active games
-    private String generateGameList() {
-        // create JSON object to add active games to
-        JSONObject JsonGameList = new JSONObject();
-
-        // add active game count as attribute
-        JsonGameList.put("Active Game Count", activeGames.size());
-
-        // add each active game to the active game list JSON object
-        Game[] activeGameSnapshot = new Game[100];
+    private Game[] getActiveGameArray() {
+        // generate snapshot of current active games
+        Game[] activeGameSnapshot = new Game[Settings.MAX_GAMES];
         activeGames.toArray(activeGameSnapshot);
-        for(int i = 0; i < 100; i++) {
-            if (activeGameSnapshot[i] != null)
-                JsonGameList.put(activeGameSnapshot[i].getName(), activeGameSnapshot[i].getId());
-            else
-                break;
-        }
 
-        // return string representation of JSON object
-        return JsonGameList.toString();
+        return activeGameSnapshot;
     }
 
     public void setupClientStreamReaders() {
@@ -124,42 +135,28 @@ public class ClientHandlerThread extends Thread {
     public void createNewGame() {
         System.out.println("Client has chosen to create a new game");
 
-        // create game with new gameID
+        // create game with new gameID and default name
         int newId = getNextGameId();
         Game currentGame = new Game(newId, joiningGameQueue);
+        currentGame.setName(getGameName());
 
-        // update players game id
+        // update players game id and add them to game joining queue
         PLAYER.setGameId(newId);
-        getNameAndId();
-
-        // add player to game joining queue
+        PLAYER.setSocket(clientSocket);
         joiningGameQueue.add(PLAYER);
 
-        // launch the game
+        // add to active game list and launch
+        activeGames.add(currentGame);
         currentGame.launch();
 
     }
 
-    // queries player for name and id
-    // updates the global PLAYER object with new info
-    private void getNameAndId() {
-        // send query about joining or creating a new game
-//        PrintWriter printWriter = new PrintWriter(outputStream);
-//        printWriter.println("SERVER QUERY: What is your name?");
-//        printWriter.flush();
-//
-//        try {
-//            // get answer (create or join existing)
-//            BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
-//            answer = Integer.parseInt(in.readLine());
-//            System.out.println("Client game choice:" + answer);
-//
-//        } catch (IOException e) {   // catch reading IO error
-//            System.err.println("ERROR reading join/create answer from client" + e);
-//            e.printStackTrace();
-//        }
-
+    // returns the name for the current game
+    private String getGameName() {
+        // Set game name to [1st player]'s game
+        return PLAYER.getName() + "'s Game";
     }
+
 
     // Returns the next available game ID
     // TODO: setup a simple database to ensure game IDs are generated sequentially

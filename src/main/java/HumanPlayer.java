@@ -5,9 +5,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * HumanPlayer.java
@@ -67,23 +65,28 @@ public class HumanPlayer extends Client {
      }
 
      // return the clients choice of game to join
-     public int pickGameToJoin(HashMap gameList) {
+     public int pickGameToJoin(ArrayList<Game> gameList) {
          // parse and print number of available games
-         int gameCount = Integer.parseInt(gameList.get("Active Game Count").toString());
+         int gameCount = gameList.size();
          System.out.println("Active Game Count is: " + gameCount);
+
+         // Print out game choices
+         System.out.println("\t0\t\tNEW GAME");   // always show the option to create a new game
+         for (int i = 0; i < gameCount; i++)
+             System.out.println("\t" + gameList.get(i).getId() + "\t" + gameList.get(i).getName());   // always show the option to create a new game
 
          int answer = -1;
          while (!isAvailableGame(answer, gameList)) {
              // Ask the player which game they'd like to join
-             System.out.println("Please enter the ID number of the game you'd like to join");
+             System.out.println("Please enter the ID number of the game you'd like to join or '0' to create new game");
 
              // get the player's choice
              Scanner in = new Scanner(System.in);
              answer = in.nextInt();
          }
 
-
          System.out.println("Returning: " + answer + " as player's choice");
+         // TODO: if choice = 0 get game name
          return answer;
      }
 

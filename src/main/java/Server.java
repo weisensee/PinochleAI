@@ -14,7 +14,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class Server {
     // Port number for Server to listen on
     private static int PORT_NUMBER = 9999;      // sets the DEFAULT PORT;
-    private static int QUEUE_MAX = 100;         // max queue of players joining games
 
     public static void main(String[] args){
         Server GameServer = new Server();
@@ -28,8 +27,8 @@ public class Server {
     private void run(int port) {
         PORT_NUMBER = port; //set Server's listen port
         System.out.println("Starting Server on port:" + PORT_NUMBER);
-        BlockingQueue joiningGameQueue = new ArrayBlockingQueue(QUEUE_MAX);
-        BlockingQueue activeGames = new LinkedBlockingQueue(QUEUE_MAX);
+        BlockingQueue joiningGameQueue = new ArrayBlockingQueue(Settings.QUEUE_MAX);
+        BlockingQueue activeGames = new LinkedBlockingQueue(Settings.QUEUE_MAX);
 
         // Listen for new Client connections
         try {

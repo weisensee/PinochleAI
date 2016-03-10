@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /*
@@ -19,7 +20,7 @@ public class RandomAi extends AiPlayer {
         return 0;
     }
     public void placeMaxBid(){}                // bid on hand by placing max bid
-    public int pickGameToJoin(String query) {   // return the clients choice of game to join
+    public int pickGameToJoin(ArrayList<Game> gameList) {   // return the clients choice of game to join
         // TODO: should return the game # this player is supposed to join
         return 0;
     }
@@ -29,7 +30,7 @@ public class RandomAi extends AiPlayer {
 
     // returns the player's next play
     public Card getNextPlay() {
-        return new Card();
+        return new Card(0);
     }
 
     // Updates the player's information with the newest play
