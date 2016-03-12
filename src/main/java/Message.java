@@ -1,7 +1,7 @@
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
+import com.google.gson.Gson;
+
+import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -24,310 +24,92 @@ import java.util.ArrayList;
 
 // TODO: implement message parsing to and from JSON
 public class Message {
-    String INITSTRING;       // Original string that message was created from
-    boolean ISVALIDJSON;    // is false if message Json was identified as invalid, null, etc
-    PlayerProfile OWNER;    // owner who created this message
-    JSONObject MSGJSON;     // body of message
+    // Message Type Code
+    private static final int PLAYER_PROFILE = 1;
+    private static final int GAME_LIST = 2;
+    private static final int GAME = 3;
+    private static final int GAME_STATUS = 4;
+    private static final int HAND_DEALT = 5;
+    private static final int GAME_STATE = 6;
 
-    //****DEFAULT TYPE NAMING CONVENTIONS****
-    public static final String TYPE_NAME = "Type";
-    public static final String ACTIVEGAMECOUNT_NAME = "Active Game Count";
-    public static final String GAMELIST_NAME = "Game List";
-    public static final String PLAYERID_NAME = "Player ID";
-    public static final String PLAYERSTR_NAME = "Player Name";
-    public static final String GAMEID_NAME = "GameId Name";
-    public static final String PLAYERSOCKET_NAME = "Player Socket";
+    // Status number for communicating game status
+    private static final int GAME_OVER = 1;              // game is over
+    private static final int WAITING_FOR_PLAYERS = 3;    // waiting for other players to join game
+    private static final int GAME_STARTING = 4;          // waiting for other players to join game
 
-    // Message Codes
-    public static final int GAME_LIST = 1;
-    public static final int GAME_STATUS = 2;
-    public static final int HAND_DEALT = 3;
-    public static final int GAME_STATE = 4;
 
+    protected int TYPE;   // message type identifier
+    protected String MSG; // message body
 
     // default constructor
-    public Message() {
-        // initialize json validity to false
-        ISVALIDJSON = false;
+    public Message(){}
 
-        // initialize owner profile
-        OWNER = new PlayerProfile();
-
-        // initialize message's json object
-        MSGJSON = new JSONObject();
-
+    // constructs Message of the given type with the given object
+    public Message(int type, Object toSerialize) {
+        TYPE = type;
+        MSG = serialize(toSerialize);
     }
 
-    // constructs this message from json object parsed from string argument
-    public Message(String newMsg) {
-        // Check that passed in Json string is valid
-        ISVALIDJSON = isValidJson(newMsg);
-
-        // initialize the message with passed in String
-        INITSTRING = newMsg;
-
-        // parse string argument into JSON object
-        JSONObject msgJson = parseString(newMsg);
-
-        // set local json obj
-        MSGJSON = msgJson;
-
-        // set message owner if the json obj was valid and contains a PlayerProfile
-        if (ISVALIDJSON && containsPlayerProfile(MSGJSON))
-            OWNER = parsePlayerProfile(MSGJSON);
-    }
-
-    // returns true if JSONObject passed in by argument contains a player profile
-    public boolean containsPlayerProfile(JSONObject toCheck) {
-        // check for PlayerProfile Data
-        if (toCheck != null &&  toCheck.containsKey(PLAYERID_NAME) && toCheck.containsKey(PLAYERSTR_NAME))
-            return true;
-
-        else                // if no PlayerProfile data is present
-            return false;   // return false
-    }
-
-    // Returns JSONObject created by parsing String argument
-    // returns null if string was not valid
-    public JSONObject parseString(String jsonString) {
-        JSONObject completeMsgJson = null;
-
-        if (isValidJson(jsonString))
-            completeMsgJson = parseStrToJson(jsonString);
-
-        // return null or parsed, valid string
-        return completeMsgJson;
-    }
-
-    // parses and returns a PlayerProfile from JSONObject argument
-    private PlayerProfile parsePlayerProfile(JSONObject jsonMsg) {
-        PlayerProfile tempProfile = new PlayerProfile();
-
-        // Set Profile's personal ID number (converting long to int)
-        tempProfile.setId(((Long)jsonMsg.get(PLAYERID_NAME)).intValue());
-
-        // Set Profile's current game_id number
-        tempProfile.setGameId(((Long)jsonMsg.get(GAMEID_NAME)).intValue());
-
-        // Set Profile's Name
-        tempProfile.setName((String)jsonMsg.get(PLAYERSTR_NAME));
-
-        // set Profile's Socket
-        // TODO: test if this socket passing scheme even works
-        tempProfile.setSocket((Socket)jsonMsg.get(PLAYERSOCKET_NAME));
-
-        // Return the new player profile
-        return tempProfile;
-    }
-
-    // Puts owner information into JSONObject
-    public void parseOwnerToJson() {
-        // Set Profile's personal ID number
-        MSGJSON.put(PLAYERID_NAME, OWNER.getId());
-
-        // Set Profile's current game_id number
-        MSGJSON.put(GAMEID_NAME, OWNER.getGameId());
-
-        // Set Profile's Name
-        MSGJSON.put(PLAYERSTR_NAME, OWNER.getName());
-
-        // set Profile's Socket
-        // TODO: test if this socket passing scheme even works
-        MSGJSON.put(PLAYERSOCKET_NAME, OWNER.getSocket());
-    }
-
-    // Sets the current message's owner to the one passed in as argument
-    public void setOwner(PlayerProfile newOwner) {
-        OWNER = newOwner;
-    }
-
-    // Takes JSON string and returns JSONObject of that string
-    // Returns null if string parsing fails
-    // TODO: determine what type of message is coming in and how they should be parsed!
-    private JSONObject parseStrToJson(String toParse) {
-        try {
-            // convert to JSON
-            JSONParser parser = new JSONParser();
-            Object obj = parser.parse(toParse);
-
-            // return JSONObject
-            return (JSONObject)obj;
-
-            // Handle errors thrown in parsing
-        } catch(ParseException pe) {
-            System.err.println("Error parsing json string");
-            System.err.println(pe);
+    // Deserializing constructor
+    public Message(String newMessage) {
+        // deserialize new message
+        Gson gson = new Gson();
+        Message temp = gson.fromJson(newMessage, Message.class);
+        if(temp != null && temp.MSG != null) {
+            TYPE = temp.TYPE;
+            MSG = temp.MSG;
         }
-
-        // should never return null
-        System.out.print("returning null on parse error!!");
-        return null;
-    }
-
-    // Returns True if current, locally defined JsonString is a valid Json object
-    public boolean isValidJson() {
-        return ISVALIDJSON;
-    }
-
-    // Checks the String argument for validity, returns true if is a valid Json object
-    public boolean isValidJson(String toCheck) {
-        // check for null string
-        if (null == toCheck)
-            return false;
-
-        // TODO: implement more rigorous json checking here
-
-        // if passed in json string object seems valid return true
-        return true;
-    }
-
-    // creates a message containing the hand dealt
-    public void handDealt(Hand hand) {
-        // TODO: implement hand parsed to json, utilize Hand class
-    }
-
-    // creates a message containing a game's info
-
-    // returns a string representaion of the message
-    public String print() {
-        return INITSTRING;
-    }
-
-    // returns the message's game id
-    // eg. that of the game the player is playing/has chosen
-    public int getGameId() {
-        // if Owner information has been added, return it
-        if (!OWNER.isDefault())
-            return OWNER.getGameId();
-
-        else {
-            System.err.println("GameId requested from message without Owner information");
-            return -1;
-        }
-    }
-
-    // returns owner's player profile
-    public PlayerProfile getOwner() {
-        return OWNER;
-    }
-
-    // creates JSON message from gamelist passed in as array
-    // sets active game count and adds each game to the json object
-    public void createGameListMessage(Game[] gameArray) {
-//            MSGJSON.put(gameArray[i].getName(), gameArray[i].getId());
-
-        // set message type to game list
-        setType(GAMELIST_NAME);
-
-        // add each game's data to local JSON object
-        for(int i = 0; i < Settings.MAX_GAMES; i++) {
-            if (gameArray[i] != null) {
-                MSGJSON.put(i, gameArray[i].getId());
-                MSGJSON.put(gameArray[i].getId(), gameArray[i].getName());
-            }
-            else {
-                MSGJSON.put(ACTIVEGAMECOUNT_NAME, i);    // if all games are added, add game count
-                break;
-            }
-        }
-    }
-
-    // get Game list message
-    public ArrayList<Game> getGameList() {
-        int activeGameCount = ((Long)MSGJSON.get(ACTIVEGAMECOUNT_NAME)).intValue();
-        ArrayList<Game> gameList = new ArrayList<Game>(activeGameCount);
-
-        // add each game in the JSON object to the list
-        for (int i = 0; i < activeGameCount; i++) {
-            Game game = new Game(((Long)MSGJSON.get(Integer.toString(i))).intValue(), null);
-            game.setName((String)MSGJSON.get(Integer.toString(game.getId())));
-            gameList.add(game);
-        }
-
-        // return completed list
-        return gameList;
-    }
-
-    // sets the type of current message to the type passed in as argument
-    private void setType(String type) {
-        MSGJSON.put(TYPE_NAME, type);
-    }
-
-    // Creates a game status message for all players and observers
-    public void createGameStateMessage(GameState gameState) {
-        // Set type of message
-        MSGJSON.put(TYPE_NAME, GAME_STATE);
-
-        // copy over values
-        MSGJSON.put("bid winner", gameState.getBidWinner());
-        for (int i = 0; i < 4; i++)
-            MSGJSON.put("meld"+i, gameState.getMeld(i));
-        MSGJSON.put("played", gameState.getCardsPlayed());
-        MSGJSON.put("bid", gameState.getBid());
-        MSGJSON.put("game id", gameState.getGameId());
-
-    }
-
-    // returns a gameState from a gamestate message
-    public GameState getGameState() {
-        GameState toReturn = new GameState();
-
-        toReturn.setGameId(Integer.parseInt((String)MSGJSON.get("game id")));
-        toReturn.setBid(Integer.parseInt((String)MSGJSON.get("bid")));
-        toReturn.setBidWinner((Integer)MSGJSON.get("bid winner"));
-        toReturn.setCardsPlayed((String)MSGJSON.get("played"));
-        for(int i = 0; i < 4; i++)
-            toReturn.setMeld(i, (Integer)MSGJSON.get("meld"+i));
-
-        return toReturn;
-    }
-
-    // create a status message with the argument passed in as the status
-    public void createStatusMsg(int status) {
-        // set type to status message
-        MSGJSON.put(TYPE_NAME, GAME_STATUS);
-
-        // copy the status
-        MSGJSON.put(GAME_STATUS, status);
-    }
-
-    // returns the game's status code, returns -1 if not a status message
-    public int getGameStatus() {
-        if (isGameStatus())
-            return (Integer)MSGJSON.get(GAME_STATUS);
-
         else
-            return -1;
+            System.err.println("ERROR deserializing message, message contains null values:" + temp);
     }
 
-    // Returns true is message is a gameState
-    public boolean isGameState() {
-        return GAME_STATE == MSGJSON.get(TYPE_NAME);
+    // returns String version of this message
+    public String getJsonString() {
+        return serialize(this);
     }
 
-    // Return true if message is a hand dealt
-    public boolean isHandDealt() {
-        return HAND_DEALT == MSGJSON.get(TYPE_NAME);
+    private static String serialize(Object toSerialize) {
+        Gson gson = new Gson();
+        return gson.toJson(toSerialize);
     }
 
-    // returns true if message is a game status
-    public boolean isGameStatus() {
-        return GAME_STATUS == MSGJSON.get(TYPE_NAME);
+    //******************* MESSAGE CREATORS ****************
+    // creates Message holding a Game's status code
+    private static Message createStatusMsg(int status) {return new Message(GAME_STATUS, status);}
+    public static Message createGameListMsg(Game[] activeGames) {return new Message(GAME_LIST, activeGames);}
+    public static Message createGameMsg(Game game) {return new Message(GAME, game);}
+    public static Message createHandDealtMsg(Hand handDealt) {return new Message(HAND_DEALT, handDealt);}
+    public static Message createGameStateMsg(GameState gameState) {return new Message(GAME_STATE, gameState);}
+    public static Message createPlayerProfileMsg(PlayerProfile profile) {return new Message(PLAYER_PROFILE, profile);}
+    public static Message createWaitingForPlayersMsg() {return createStatusMsg(WAITING_FOR_PLAYERS);}
+
+
+    //******************* Object Getters *******************
+    // returns the player profile contained in the message (if it has one)
+    public PlayerProfile getPlayerProfile() {
+        Gson gson = new Gson();
+        return gson.fromJson(MSG, PlayerProfile.class);
     }
 
-    // returns true if message is an active game list
-    public boolean isGameList() {
-        return GAME_LIST == MSGJSON.get(TYPE_NAME);
+    // returns the game list contained in the message
+    public ArrayList<Game> getGameList() {
+        return new ArrayList<Game>();
     }
 
-    // returns local json object as a string, adds owner if possible
-    public String getString() {
-        // if the ownwer is not default, send it along in message
-        if (!OWNER.isDefault())
-            parseOwnerToJson();
-
-        // convert json object and return it
-        return MSGJSON.toString();
+    // returns the GameState contained in the message
+    public GameState getGameState() {
+        return new GameState();
     }
 
+
+    //******************* STATUS CHECKING FUNCTIONS ***********
+    public boolean isGameState() {return TYPE == GAME_STATE;}
+    public boolean isGame() {return TYPE == GAME;}
+    public boolean isHandDealt() {return TYPE == HAND_DEALT;}
+    public boolean isPlayerProfile() {return TYPE == PLAYER_PROFILE;}
+    public boolean isGameStatus() {return TYPE == GAME_STATUS;}
+    public boolean gameIsStarting() {return MSG.equals(GAME_STARTING);}
+    public boolean waitingForPlayers() {return WAITING_FOR_PLAYERS == Integer.parseInt(MSG);}
+    public boolean isValidJson() {// returns true if Message is a valid json message
+        return MSG.length() > 0;}
 }
