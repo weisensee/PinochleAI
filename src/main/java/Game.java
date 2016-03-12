@@ -18,9 +18,9 @@ public class Game {
     private String NAME;                    // this Game's name
     private int GAME_ID;                    // Game's unique ID # (> 0)
     private PlayerProfile[] PLAYERS;        // clients in this Game
-    private Hand[] HANDS;                   // cards each player holds
+    transient private Hand[] HANDS;                   // cards each player holds
     private int[] SCORES;                   // teams scores
-    private BlockingQueue joiningGameQueue; // blocking queue of players waiting to join another game
+    transient private BlockingQueue joiningGameQueue; // blocking queue of players waiting to join another game
 
     // Constructor, takes the new game's ID
     public Game(int gameId, BlockingQueue joiningQueue) {
@@ -52,7 +52,7 @@ public class Game {
         waitForPlayers();
 
         // If game is not over, continue
-        while(!readyToPlay()) {
+        while(readyToPlay()) {
             // Deal out cards
             dealCards();
 
@@ -93,7 +93,9 @@ public class Game {
 
             // TODO: if all players have left, close this game!!
             // if there's space left and no players in queue
-            sendMsgToAllPLayers(Message.createWaitingForPlayersMsg()); // tell active players we're waiting
+            Message toSend = new Message();
+            toSend.createWaitingForPlayersMsg();
+            sendMsgToAllPLayers(toSend); // tell active players we're waiting
         }
     }
 
@@ -110,16 +112,17 @@ public class Game {
         for (int i = 0; i < MAX_PLAYERS; i++)   // for each player position
             if (PLAYERS[i] == null) {           // if the position is available
                 PLAYERS[i] = toAdd;             // add the new player to that spot
+                System.out.println("Added Player: " + toAdd);
                 break;                          // once the player has a spot, stop looking for a spot
             }
 
         // remove the player from the game waiting list (joiningGameQueue)
         if (joiningGameQueue.remove(toAdd)) {
             // if player was added successfully, update them with game status
-            Message gameInfo = new Message();
             GAMESTATE.setGameId(GAME_ID);
-
-            toAdd.sendMsg(Message.createGameStateMsg(GAMESTATE));
+            Message toSend = new Message();
+            toSend.createGameStateMsg(GAMESTATE);
+            toAdd.sendMsg(toSend);
             return 1;
         }
 
@@ -148,14 +151,6 @@ public class Game {
 
         // if game is not over, continue
         return true;
-    }
-
-    // Send String argument to all active players
-    public void sendToAllPlayers(String toSend) {
-        // for each current player
-//        for (int i = 0; i < MAX_PLAYERS; i++)
-//            if (PLAYERS[i] != null)
-//                PLAYERS[i].send
     }
 
     // TODO: test that this works/is dealing out cards to players

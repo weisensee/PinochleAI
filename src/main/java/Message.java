@@ -1,7 +1,9 @@
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -42,25 +44,17 @@ public class Message {
     protected String MSG; // message body
 
     // default constructor
-    public Message(){}
-
-    // constructs Message of the given type with the given object
-    public Message(int type, Object toSerialize) {
-        TYPE = type;
-        MSG = serialize(toSerialize);
+    public Message(){
+        MSG = " ";
+        TYPE = -1;
     }
 
-    // Deserializing constructor
-    public Message(String newMessage) {
-        // deserialize new message
-        Gson gson = new Gson();
-        Message temp = gson.fromJson(newMessage, Message.class);
-        if(temp != null && temp.MSG != null) {
-            TYPE = temp.TYPE;
-            MSG = temp.MSG;
-        }
-        else
-            System.err.println("ERROR deserializing message, message contains null values:" + temp);
+    // constructs Message of the given type with the given object
+    private static Message parseMessage(int type, Object toSerialize) {
+        Message temp = new Message();
+        temp.TYPE = type;
+        temp.MSG = serialize(toSerialize);
+        return temp;
     }
 
     // returns String version of this message
@@ -73,17 +67,6 @@ public class Message {
         return gson.toJson(toSerialize);
     }
 
-    //******************* MESSAGE CREATORS ****************
-    // creates Message holding a Game's status code
-    private static Message createStatusMsg(int status) {return new Message(GAME_STATUS, status);}
-    public static Message createGameListMsg(Game[] activeGames) {return new Message(GAME_LIST, activeGames);}
-    public static Message createGameMsg(Game game) {return new Message(GAME, game);}
-    public static Message createHandDealtMsg(Hand handDealt) {return new Message(HAND_DEALT, handDealt);}
-    public static Message createGameStateMsg(GameState gameState) {return new Message(GAME_STATE, gameState);}
-    public static Message createPlayerProfileMsg(PlayerProfile profile) {return new Message(PLAYER_PROFILE, profile);}
-    public static Message createWaitingForPlayersMsg() {return createStatusMsg(WAITING_FOR_PLAYERS);}
-
-
     //******************* Object Getters *******************
     // returns the player profile contained in the message (if it has one)
     public PlayerProfile getPlayerProfile() {
@@ -93,14 +76,41 @@ public class Message {
 
     // returns the game list contained in the message
     public ArrayList<Game> getGameList() {
-        return new ArrayList<Game>();
+        Gson gson = new Gson();
+        Type GameListType = new TypeToken<ArrayList<Game>>(){}.getType();
+        return gson.fromJson(MSG, GameListType);
     }
 
     // returns the GameState contained in the message
     public GameState getGameState() {
-        return new GameState();
+        Gson gson = new Gson();
+        return gson.fromJson(MSG, GameState.class);
     }
 
+    //******************* MESSAGE CREATORS ****************
+    // creates Message holding a Game's status code
+    private void createStatusMsg(int status) {
+        TYPE = GAME_STATUS;
+        MSG = serialize(status);
+    }
+    public void createPlayerProfileMsg(PlayerProfile profile) {
+        TYPE = PLAYER_PROFILE;
+        MSG = serialize(profile);
+    }
+    public void createWaitingForPlayersMsg() {
+        createStatusMsg(WAITING_FOR_PLAYERS);
+    }
+
+    public void createGameListMsg(Game[] activeGames) {
+        TYPE = GAME_LIST;
+        MSG = serialize(activeGames);
+    }
+    public void createGameStateMsg(GameState gameState) {
+        TYPE = GAME_STATE;
+        MSG = serialize(gameState);
+    }
+//    public static Message createGameMsg(Game game) {return parseMessage(GAME, game);}
+//    public static Message createHandDealtMsg(Hand handDealt) {return parseMessage(HAND_DEALT, handDealt);}
 
     //******************* STATUS CHECKING FUNCTIONS ***********
     public boolean isGameState() {return TYPE == GAME_STATE;}

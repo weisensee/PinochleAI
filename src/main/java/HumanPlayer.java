@@ -1,3 +1,5 @@
+import com.google.gson.Gson;
+
 import java.util.*;
 
 /**
@@ -61,14 +63,16 @@ public class HumanPlayer extends Client {
 
      // return the clients choice of game to join
      public int pickGameToJoin(ArrayList<Game> gameList) {
-         // parse and print number of available games
+         // parse possible number of available games
          int gameCount = gameList.size();
-         System.out.println("Active Game Count is: " + gameCount);
 
          // Print out game choices
          System.out.println("\t0\t\tNEW GAME");   // always show the option to create a new game
-         for (int i = 0; i < gameCount; i++)
-             System.out.println("\t" + gameList.get(i).getId() + "\t" + gameList.get(i).getName());   // always show the option to create a new game
+         for (int i = 0; i < gameCount && gameList.get(i) != null; i++) {
+//             Gson gson = new Gson();
+//             Game current = gson.fromJson(gameList.get(i), Game.class);
+             System.out.println("\t" + ((Game)gameList.get(i)).getId() + "\t" + gameList.get(i).getName());   // always show the option to create a new game
+         }
 
          int answer = -1;
          while (!isAvailableGame(answer, gameList)) {

@@ -83,7 +83,9 @@ public class ClientHandlerThread extends Thread {
         int answer = -1;    // initialize to negative, all game IDs are >0
 
         // generate and and send the current active game list
-        PLAYER.sendMsg(Message.createGameListMsg(getActiveGameArray()));
+        Message toSend = new Message();
+        toSend.createGameListMsg(getActiveGameArray());
+        PLAYER.sendMsg(toSend);
 
         // Get JSONObject String of Player's Profile from client
         try {
@@ -158,6 +160,7 @@ public class ClientHandlerThread extends Thread {
     // TODO: check that players are not waiting in queue for a game that is full/in progress
     public void joinGame(int toJoin) {
         System.out.println("Client has chosen to join existing game: " + toJoin);
-
+        PLAYER.setGameId(toJoin);
+        joiningGameQueue.add(PLAYER);
     }
 }

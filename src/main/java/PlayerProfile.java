@@ -1,4 +1,6 @@
 
+import com.google.gson.Gson;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.HashSet;
@@ -16,12 +18,12 @@ import java.util.HashSet;
  */
 public class PlayerProfile {
     // TODO: make socket private and setup getter/setter
-    public Socket SOCKET;   // players connection socket
+    transient public Socket SOCKET;   // players connection socket
     private String NAME;     // player's chosen name
     private int ID;         // player's unique ID number
     private int GAME_ID;    // Game ID of game player wants to join
-    public DataOutputStream outputStream;   // output stream to client
-    public DataInputStream inputStream;     // input stream from client
+    transient public DataOutputStream outputStream;   // output stream to client
+    transient public DataInputStream inputStream;     // input stream from client
     public PlayerProfile() {
         // initiate with default values
         ID = -1;
@@ -36,7 +38,7 @@ public class PlayerProfile {
         // TODO: implement "try with resources" try (resource) {...} -->need later java version
         try {
             PrintWriter printWriter = new PrintWriter(outputStream);
-            printWriter.println(toSend.getJsonString());
+             printWriter.println(toSend.getJsonString());
             printWriter.flush();
             return 1;
         } catch (Exception e) {
@@ -52,7 +54,7 @@ public class PlayerProfile {
         // read in message from inputStream
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(inputStream));
-            return new Message(in.readLine());
+            return strToJson(in.readLine());
         } catch (Exception e) {
             System.err.println("ERROR retrieving message in PlayerProfile->getMessage for: " + purpose);
             System.err.println(e);
@@ -79,6 +81,19 @@ public class PlayerProfile {
         }
     }
 
+    // converts JSON string to Message, returns message
+    private Message strToJson(String toParse) {
+        // deserialize new message
+        Gson gson = new Gson();
+        Message tempMsg = gson.fromJson(toParse, Message.class);
+        if(tempMsg != null && tempMsg.MSG != null) {
+            return tempMsg;
+        }
+        else
+            System.err.println("ERROR deserializing message, message contains null values:" + tempMsg);
+
+        return null;
+    }
     // returns the player's name as String
     public String getName() {
         return NAME;

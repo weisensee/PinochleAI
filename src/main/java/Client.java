@@ -55,7 +55,9 @@ public abstract class Client {
 
     // logs the player into the server
     private void loginToServer(PlayerProfile newPlayer) {
-        SERVER.sendMsg(Message.createPlayerProfileMsg(newPlayer));
+        Message toSend = new Message();
+        toSend.createPlayerProfileMsg(newPlayer);
+        SERVER.sendMsg(toSend);
     }
 
     // Initiates the global settings and variables then sets up the connection to server
@@ -82,7 +84,9 @@ public abstract class Client {
         PROFILE.setGameId(pickGameToJoin(gameList));
 
         // Send PROFILE Message object as JSON string to server
-        SERVER.sendMsg(Message.createPlayerProfileMsg(PROFILE));
+        Message toSend = new Message();
+        toSend.createPlayerProfileMsg(PROFILE);
+        SERVER.sendMsg(toSend);
 
         // verify game is joined a GameState from newly joined game
         Message gameJoinedMsg = SERVER.getMessage("waiting for game joined confirmation");

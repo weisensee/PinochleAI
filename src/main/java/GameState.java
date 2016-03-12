@@ -1,7 +1,3 @@
-import com.sun.xml.internal.fastinfoset.util.CharArray;
-
-import java.util.ArrayList;
-
 /**
  * GameState.java
  * Lucas Weisensee
@@ -15,7 +11,7 @@ import java.util.ArrayList;
 public class GameState {
     private int GAME_ID;
     public int BID_WINNER;
-    public int BID_AMMOUNT;
+    public int BID_AMOUNT;
     public int[] MELD;
     private int playPosition;
     private int[] CARDS_PLAYED;
@@ -24,7 +20,7 @@ public class GameState {
     // Default constructor--initializes values
     public GameState() {
         GAME_ID = -1;
-        BID_AMMOUNT = 0;
+        BID_AMOUNT = 0;
         BID_WINNER = -1;
         MELD = new int[4];
         CARDS_PLAYED = new int[48];
@@ -78,7 +74,7 @@ public class GameState {
 
     // returns the winning bid ammount
     public int getBid() {
-        return BID_AMMOUNT;
+        return BID_AMOUNT;
     }
 
     // set meld made by specific player
@@ -96,7 +92,7 @@ public class GameState {
             System.err.println("argument in setBid is Out of legal bounds");
 
         else
-            BID_AMMOUNT = newBid;
+            BID_AMOUNT = newBid;
     }
 
     // set meld made by specific player
