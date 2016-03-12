@@ -1,6 +1,3 @@
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
 /**
@@ -15,16 +12,15 @@ import java.util.concurrent.BlockingQueue;
  *     -Client list
  */
 public class Game {
+    private static final int WINNING_SCORE = 1500;   // score required to win
     private int MAX_PLAYERS = 4;            // player cap
     private GameState GAMESTATE;            // this Game's current state
-    private int PORT;                       // port to connect on
     private String NAME;                    // this Game's name
     private int GAME_ID;                    // Game's unique ID # (> 0)
     private PlayerProfile[] PLAYERS;        // clients in this Game
-    private Hand[] HANDS;            // cards each player holds
+    private Hand[] HANDS;                   // cards each player holds
     private int[] SCORES;                   // teams scores
     private BlockingQueue joiningGameQueue; // blocking queue of players waiting to join another game
-    public static final int WINNING_SCORE = 1500;   // score required to win
 
     // Constructor, takes the new game's ID
     public Game(int gameId, BlockingQueue joiningQueue) {
@@ -91,9 +87,13 @@ public class Game {
                         break;
                 }
             }
+
+            // pause between searching for new players
+            try {Thread.sleep(10000);}catch (InterruptedException e){}
+
             // TODO: if all players have left, close this game!!
             // if there's space left and no players in queue
-            sendStatusToPlayers(Settings.WAITING_FOR_PLAYERS); // tell active players we're waiting
+            sendMsgToAllPLayers(Message.createWaitingForPlayersMsg()); // tell active players we're waiting
         }
     }
 
@@ -118,8 +118,8 @@ public class Game {
             // if player was added successfully, update them with game status
             Message gameInfo = new Message();
             GAMESTATE.setGameId(GAME_ID);
-            gameInfo.createGameStateMessage(GAMESTATE);
-            toAdd.sendMsg(gameInfo);
+
+            toAdd.sendMsg(Message.createGameStateMsg(GAMESTATE));
             return 1;
         }
 
@@ -129,13 +129,10 @@ public class Game {
     }
 
     // Updates all players with status of current game
-    private void sendStatusToPlayers(int status) {
-        Message statusMsg = new Message();
-        statusMsg.createStatusMsg(status);
-
+    private void sendMsgToAllPLayers(Message msg) {
         for (int i = 0; i < 4; i++)
             if (PLAYERS[i] != null)
-                PLAYERS[i].sendMsg(statusMsg);
+                PLAYERS[i].sendMsg(msg);
     }
 
     // Returns true if game is ready to play, false otherwise
@@ -178,10 +175,8 @@ public class Game {
 
             // send dealt hands
             Message handDealt = new Message();
-            handDealt.handDealt(HANDS[i]);
             PLAYERS[i].sendMsg(handDealt);
         }
-
 
     }
 

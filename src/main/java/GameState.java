@@ -43,7 +43,11 @@ public class GameState {
 
     // return stored char array representing the played cards
     public String getCardsPlayed() {
-        return charCardsPlayed.toString();
+        String temp = new String();
+        for (int i = 0; i < 48; i++)
+            temp += charCardsPlayed[i];
+
+        return temp;
     }
 
     // returns game's id
@@ -97,7 +101,7 @@ public class GameState {
 
     // set meld made by specific player
     public void setBidWinner(int winner) {
-        if (winner < 0 || winner > 3)
+        if (winner < -1 || winner > 3 ) /* -1 is default value*/
             System.err.println("argument in setBidWinner is Out of legal bounds");
 
         else
@@ -105,11 +109,12 @@ public class GameState {
     }
 
     // copy played cards into card string and array
-    public void setCardsPlayed(String played) {
+    public void setCardsPlayed(String cardStr) {
+        char[] played = cardStr.toCharArray();
         playPosition = 0;
         for (int i = 0; i < 48; i++) {
-            if (played.charAt(i) != (char)-1)  // if there is a card there (all cards are initialized to -1)
-                playCard(new Card(played.charAt(i)));
+            if (played[i] != (char)-1)  // if there is a card there (all cards are initialized to -1)
+                playCard(new Card(played[i]));
 
             else    // quit when all cards have been copied
                 break;

@@ -12,7 +12,7 @@ public class Card {
     // initialize the card with the card corresponding to the integer passed in
     public Card(int _value) {
         // check that value is legal
-        if (_value >= 48 || _value < 0)
+        if (_value >= 48 || _value < -1) /*-1 is default value*/
             System.err.println("ERROR initializing Card: value outside of bounds: " + _value);
 
         // initialize new card's value

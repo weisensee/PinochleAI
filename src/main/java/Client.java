@@ -1,6 +1,3 @@
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -16,14 +13,9 @@ import java.util.*;
 
 public abstract class Client {
     // ::GLOBAL VARIABLES::
-    public static int DEFAULT_PORT = 9999;      // default port for Server
-    public int PORT_NUMBER;                     // Port number to listen for new connections on
-    public String SERVER_ADDRESS = "0.0.0.0";   // default server address, localhost
-    public Socket SERVER;                       // game server's socket
-    public Game GAME;                  // game data for current game
-    public BufferedReader inputStream;          // server socket reading stream
-    public DataOutputStream outputStream;       // server socket writing stream
     public PlayerProfile PROFILE;               // Local players profile info
+    public PlayerProfile SERVER;               // Severs connection info
+    public Game GAME;                           // game data for current game
     public List<Card> HAND;                     // Local player's hand
     public GameState GAMESTATE;                 // most recent game's state
 
@@ -32,12 +24,13 @@ public abstract class Client {
     public abstract void processNewPlay(GameState currentGame); // allows the player to handle the most recent play
     public abstract void placeMaxBid();                         // bid on hand by placing max bid
     public abstract int pickGameToJoin(ArrayList<Game> gameList);       // return the clients choice of game to join
-    public abstract void setNameAndId();                        // sets up the global PlayerProfile info
+    public abstract PlayerProfile getNameAndId();                        // sets up the global PlayerProfile info
 
     // Client constructor
     public Client() {
         // initiate PlayerProfile
         PROFILE = new PlayerProfile();
+        SERVER = new PlayerProfile();
     }
 
     // Starts the Client with given arguments
@@ -47,7 +40,7 @@ public abstract class Client {
         initiateConnection(port);
 
         // Set name and ID
-        setNameAndId();
+        loginToServer(getNameAndId());
 
         // join or create a new game
         joinOrCreateGame();
@@ -60,21 +53,19 @@ public abstract class Client {
 
     }
 
+    // logs the player into the server
+    private void loginToServer(PlayerProfile newPlayer) {
+        SERVER.sendMsg(Message.createPlayerProfileMsg(newPlayer));
+    }
+
     // Initiates the global settings and variables then sets up the connection to server
     public void initiateConnection(int port) {
-        // set port for Client to use
-        PORT_NUMBER = port;
-        System.out.println("Starting Client on port:" + PORT_NUMBER);
+        System.out.println("Starting Client on port:" + port);
 
         // Setup socket and stream readers
         try {
             // bind server socket
-            SERVER = new Socket(InetAddress.getByName(SERVER_ADDRESS), PORT_NUMBER);
-
-            // initiate stream readers
-            inputStream = new BufferedReader(new InputStreamReader(SERVER.getInputStream()));
-            outputStream = new DataOutputStream(SERVER.getOutputStream());
-
+            SERVER.setSocket(new Socket(InetAddress.getByName(Settings.SERVER_ADDRESS), port));
         } catch (IOException e) {
             System.err.println("ERROR initiating streams:" + e.toString());
             e.printStackTrace();
@@ -87,27 +78,29 @@ public abstract class Client {
         ArrayList<Game> gameList = getActiveGameList();
 
         // retrieve client's game choice
+
         PROFILE.setGameId(pickGameToJoin(gameList));
 
-        // create response message for server
-        Message gameChoice = new Message();
-        gameChoice.setOwner(PROFILE);
+        // Send PROFILE Message object as JSON string to server
+        SERVER.sendMsg(Message.createPlayerProfileMsg(PROFILE));
 
-        // Send PROFILE JSON object as string to server
-        printToOutputStream(gameChoice.getString());
-
-        // verify game is joined
-        Message gameJoined = getNewMessage("waiting for game joined confirmation");
-        if (gameJoined.isGameState()) {
-            GAMESTATE = gameJoined.getGameState();
+        // verify game is joined a GameState from newly joined game
+        Message gameJoinedMsg = SERVER.getMessage("waiting for game joined confirmation");
+        if (gameJoinedMsg.isGameState()) {
+            GAMESTATE = gameJoinedMsg.getGameState();
             System.out.println("Game Joined: " + GAMESTATE.getGameId());
         }
+        else {
+            System.err.println("game joined confirmation message not received!");
+            System.err.println("Message received: " + gameJoinedMsg);
+        }
+
     }
 
     // Returns a ArrayList containing all active games
     // Returns null on failure
     private ArrayList<Game> getActiveGameList() {
-        Message gameChoice = getNewMessage("reading game list from server");
+        Message gameChoice = SERVER.getMessage("reading game list from server");
         return gameChoice.getGameList();                    // extract gamelist array
     }
 
@@ -119,13 +112,13 @@ public abstract class Client {
 
         // wait for game to be ready before joining
         while(!ready) {
-            Message msg = getNewMessage("game status update in waiting queue");
+            Message msg = SERVER.getMessage("game status update in waiting queue");
 
             // if message is status message respond accordingly
             if (msg.isGameStatus()) {
-                if (msg.getGameStatus() == Settings.GAME_STARTING)
+                if (msg.gameIsStarting())
                     ready = true;   // Time to play!
-                else if (msg.getGameStatus() == Settings.WAITING_FOR_PLAYERS)
+                else if (msg.waitingForPlayers())
                     System.out.print(" ...still waiting... ");
             }
 
@@ -136,52 +129,6 @@ public abstract class Client {
             }
         }
     }
-
-    // returns the next message from the server
-    // prints the purpose in the error if one should occur
-    public Message getNewMessage(String purpose) {
-        Message toReturn = null;
-        try {
-            toReturn = new Message(inputStream.readLine());
-        } catch (IOException e) {
-            System.err.println("Error in getNewMessage for: " + purpose);
-            System.err.println(e);
-            System.exit(-1);        // quit on error!
-        }
-
-        return toReturn;
-    }
-
-    // Convert string to JSONObject Map
-    public HashMap getHashFromString(String toConvert) {
-        JSONObject jsonObj = new JSONObject();
-
-        // convert to JSONObject
-        try {
-            JSONParser parser = new JSONParser();      // create parser for JSON-simple
-            Object temp = parser.parse(toConvert);   // parse gameList obj from server
-            jsonObj = (JSONObject)temp;
-        } catch (ParseException e) {
-            System.err.println("ERROR parsing active game list from server" + e);
-            e.printStackTrace();
-        }
-
-        // Create HashMap from JSONObject
-        HashMap<String, Integer> gameListHashMap = new HashMap();     // create HashMap to return
-        Set<String> keySet = jsonObj.keySet();                          // get list of keys in JSONObject
-        Iterator<String> iterator = keySet.iterator();
-        while(iterator.hasNext()) {
-            String currentKey = iterator.next();    // key for current item in JSONObj
-            gameListHashMap.put(currentKey, Integer.parseInt(jsonObj.get(currentKey).toString()));  // add <str, int>
-
-            // TODO: remove debugging statements
-            System.out.println("getHashFromString added ID:" + gameListHashMap.get(currentKey) + " named:" + currentKey);
-        }
-
-        // return newly created JSONObject
-        return gameListHashMap;
-    }
-
 
     // play pinochle with current game
     // high level
@@ -240,7 +187,7 @@ public abstract class Client {
     // collect cards from server/dealer
     public void getDealtHand() {
         // wait for server to send the game data, dealt cards, etc
-        Message handDealt = getNewMessage("get dealt hand");
+        Message handDealt = SERVER.getMessage("get dealt hand");
 
 
         System.out.println("Recieved Dealt Hand: " + handDealt.toString());
@@ -251,16 +198,6 @@ public abstract class Client {
         // Add cards to HAND list
 
     }
-
-
-    // Prints String argument to output stream and flushes stream
-    // TODO: have the same communication protocol in Client and Client handler!
-    private void printToOutputStream(String toPrint) {
-        PrintWriter printWriter = new PrintWriter(outputStream);
-        printWriter.println(toPrint);
-        printWriter.flush();
-    }
-
 
     // play through tricks
     public void playTricks() {

@@ -1,10 +1,3 @@
-import org.json.simple.JSONObject;
-import org.json.simple.*;
-import org.json.simple.JSONValue;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-import java.io.IOException;
 import java.util.*;
 
 /**
@@ -19,7 +12,7 @@ import java.util.*;
 public static int DEFAULT_PORT = 9999;      // default port for Server
 public int PORT_NUMBER;                     // Port number to listen for new connections on
 public String SERVER_ADDRESS = "0.0.0.0";   // default server address, localhost
-public Socket SERVER;                       // game server's socket
+public Socket SERVER_SOCKET;                       // game server's socket
 public Game PINOCHLE_GAME;                  // game data for current game
 public DataInputStream inputStream;         // server socket reading stream
 public DataOutputStream outputStream;       // server socket writing stream
@@ -30,11 +23,11 @@ public class HumanPlayer extends Client {
     // Main class: starts the program with given arguments
     public static void main(String[] args) {
         HumanPlayer Player = new HumanPlayer();
-        Player.run(DEFAULT_PORT);
+        Player.run(Settings.DEFAULT_PORT);
     }
 
      // sets up the global PlayerProfile info
-     public void setNameAndId() {
+     public PlayerProfile getNameAndId() {
          // Query player for name, echo what they input
          System.out.println("Please enter the name you'd like to use below:");
          Scanner cin = new Scanner(System.in);
@@ -44,6 +37,8 @@ public class HumanPlayer extends Client {
          // Pick a userID for the current player
          PROFILE.setId(getNewId());       // adds one to avoid returning 0
          System.out.println(PROFILE.getName() + " got new ID: " + PROFILE.getId());
+
+         return PROFILE;
      }
 
 

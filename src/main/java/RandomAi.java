@@ -13,8 +13,9 @@ public class RandomAi extends AiPlayer {
     // Main class: starts the program with given arguments
     public static void main(String[] args) {
         RandomAi Player = new RandomAi();
-        Player.run(DEFAULT_PORT);
+        Player.run(Settings.DEFAULT_PORT);
     }
+    public PlayerProfile getNameAndId() { return new PlayerProfile();}
 
     public int pickGameToJoin(HashMap gameList) { // return the clients choice of game to join
         return 0;
