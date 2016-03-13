@@ -16,8 +16,8 @@ Genetic AI
 Connect to server
 Send server 'PlayerProfile' (JSON) to "log in"
 Server sends active 'game' list (JSON) Game[]
-Send Server 'PlayerProfile' with gameID set
-Server Sends 'GameState' (JSON) of game connected to
+Client sends Server 'PlayerProfile' with gameID set
+Server Sends 'Game' (JSON) of game connected to
 
 ::WAITING FOR GAME TO START::
 Server sends game status.
