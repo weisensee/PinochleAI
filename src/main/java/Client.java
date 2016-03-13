@@ -17,7 +17,6 @@ public abstract class Client {
     public PlayerProfile SERVER;               // Severs connection info
     public Game GAME;                           // game data for current game
     public List<Card> HAND;                     // Local player's hand
-    public GameState GAMESTATE;                 // most recent game's state
 
     // ::ABSTRACT FUNCTIONS::
     public abstract Card getNextPlay();                         // gets the next play from the player
@@ -82,6 +81,8 @@ public abstract class Client {
         // retrieve client's game choice
 
         PROFILE.setGameId(pickGameToJoin(gameList));
+        GAME = new Game();
+        GAME.setId(PROFILE.getGameId());
 
         // Send PROFILE Message object as JSON string to server
         Message toSend = new Message();
@@ -90,9 +91,11 @@ public abstract class Client {
 
         // verify game is joined a GameState from newly joined game
         Message gameJoinedMsg = SERVER.getMessage("waiting for game joined confirmation");
-        if (gameJoinedMsg.isGameState()) {
-            GAMESTATE = gameJoinedMsg.getGameState();
-            System.out.println("Game Joined: " + GAMESTATE.getGameId());
+        if (gameJoinedMsg.isGame()) {
+            Game msg = gameJoinedMsg.getGame();
+            if (GAME.getId() == msg.getId())
+                GAME.update(msg);
+            System.out.println("Game Joined: " + GAME.getName() + " with ID:" + GAME.getId());
         }
         else {
             System.err.println("game joined confirmation message not received!");

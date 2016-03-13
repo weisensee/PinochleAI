@@ -12,7 +12,7 @@ import java.util.concurrent.BlockingQueue;
  *     -Client list
  */
 public class Game {
-    private static final int WINNING_SCORE = 1500;   // score required to win
+    private static int WINNING_SCORE = 1500;   // score required to win
     private int MAX_PLAYERS = 4;            // player cap
     private GameState GAMESTATE;            // this Game's current state
     private String NAME;                    // this Game's name
@@ -22,13 +22,9 @@ public class Game {
     private int[] SCORES;                   // teams scores
     transient private BlockingQueue joiningGameQueue; // blocking queue of players waiting to join another game
 
-    // Constructor, takes the new game's ID
-    public Game(int gameId, BlockingQueue joiningQueue) {
-        GAME_ID = gameId;
-        PLAYERS = new PlayerProfile[MAX_PLAYERS];
-        GAMESTATE = new GameState();
-
+    public Game() {
         // initiate each player position to null
+        PLAYERS = new PlayerProfile[MAX_PLAYERS];
         for (int i = 0; i < MAX_PLAYERS; i++) {
             PLAYERS[i] = null;
         }
@@ -37,6 +33,18 @@ public class Game {
         SCORES = new int[2];    // one score for each team
         SCORES[0] = 0;
         SCORES[1] = 0;
+
+
+        GAMESTATE = new GameState();
+    }
+
+    // Constructor, takes the new game's ID
+    public Game(int gameId, BlockingQueue joiningQueue) {
+        this();
+
+        GAME_ID = gameId;
+
+        GAMESTATE.setGameId(GAME_ID);
 
         // save blocking queue address
         if (joiningQueue != null)
@@ -119,9 +127,8 @@ public class Game {
         // remove the player from the game waiting list (joiningGameQueue)
         if (joiningGameQueue.remove(toAdd)) {
             // if player was added successfully, update them with game status
-            GAMESTATE.setGameId(GAME_ID);
             Message toSend = new Message();
-            toSend.createGameStateMsg(GAMESTATE);
+            toSend.createGameMsg(this);
             toAdd.sendMsg(toSend);
             return 1;
         }
@@ -177,6 +184,32 @@ public class Game {
 
     // Collect bids and determine bid winner
     private void manageBidding() {
+        int[] bids = getBids();
+
+        int winner = (GAMESTATE.getDealer() + 1) % MAX_PLAYERS;    // start with the player to the left of the dealer
+
+        // players must bid over the original bid to win the bid
+        for (int i = 0; i < MAX_PLAYERS; i++){
+            if (bids[i] >= bids[(i+1) % MAX_PLAYERS] && bids[i] > bids[winner])
+                winner = i;
+        }
+    }
+
+    // collects bids from each player returning an int[] containing they're bids
+    private int[] getBids() {
+        int[] bids = new int[4];
+        for (int i = 0; i < MAX_PLAYERS; i++) {
+            Message bid = PLAYERS[i].getMessage("getting max bid from each player");
+            if(bid.isMaxBid())
+                bids[i] = bid.getMaxBid();
+            else {
+                System.err.println("ERROR getting Players' bids, not MaxBid type received: " + bid);
+                return bids;
+            }
+        }
+
+        // if all bids are succesfully collected, return the array
+        return bids;
 
     }
 
@@ -227,5 +260,43 @@ public class Game {
     // returns the game's ID number as int
     public int getId() {
         return GAME_ID;
+    }
+    public int getWinningScore() {return WINNING_SCORE;}
+    public GameState getGameState() {return GAMESTATE;}
+    public int[] getScores() {return SCORES;}
+    public PlayerProfile[] getPlayers() {return PLAYERS;}
+    public void setId(int newId) {GAME_ID = newId;}
+
+    // Updates game info with new info
+    public int update(Game newInfo) {
+        // quit if update is null
+        if (newInfo == null) {
+            System.err.println("ERROR: null game received in Game->update()");
+            return -1;
+        }
+
+        // if other values are valid, update local data
+        if (newInfo.getName().length() > 0)
+            this.NAME = newInfo.NAME;
+
+        if (newInfo.MAX_PLAYERS > 0)
+            this.MAX_PLAYERS = newInfo.MAX_PLAYERS;
+
+        if (WINNING_SCORE != newInfo.getWinningScore())
+            WINNING_SCORE = newInfo.getWinningScore();
+
+        if (GAME_ID != newInfo.getId())
+            GAME_ID = newInfo.getId();
+
+        if (null != newInfo.getGameState())
+            GAMESTATE.update(newInfo.getGameState());
+
+        if (null != newInfo.getScores())
+            SCORES = newInfo.getScores();
+
+        if (null != newInfo.getPlayers())
+            PLAYERS = newInfo.getPlayers();
+
+        return 1;
     }
 }

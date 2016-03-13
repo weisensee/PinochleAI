@@ -30,9 +30,10 @@ public class Message {
     private static final int PLAYER_PROFILE = 1;
     private static final int GAME_LIST = 2;
     private static final int GAME = 3;
-    private static final int GAME_STATUS = 4;
-    private static final int HAND_DEALT = 5;
-    private static final int GAME_STATE = 6;
+    private static final int GAME_STATE = 4;
+    private static final int GAME_STATUS = 5;
+    private static final int HAND_DEALT = 6;
+    private static final int MAX_BID = 7;
 
     // Status number for communicating game status
     private static final int GAME_OVER = 1;              // game is over
@@ -86,6 +87,21 @@ public class Message {
         Gson gson = new Gson();
         return gson.fromJson(MSG, GameState.class);
     }
+    // returns the Game contained in the message
+    public Game getGame() {
+        Gson gson = new Gson();
+        return gson.fromJson(MSG, Game.class);
+    }
+
+    // returns the GameState contained in the message
+    public int getMaxBid() {
+        if (isMaxBid())
+            return Integer.parseInt(MSG);
+        else {
+            System.err.println("ERROR: requesting max bid when message is not maxbid type");
+            return -1;
+        }
+    }
 
     //******************* MESSAGE CREATORS ****************
     // creates Message holding a Game's status code
@@ -100,7 +116,10 @@ public class Message {
     public void createWaitingForPlayersMsg() {
         createStatusMsg(WAITING_FOR_PLAYERS);
     }
-
+    public void createMaxBidMsg(int maxBid) {
+        TYPE = MAX_BID;
+        MSG = serialize(maxBid);
+    }
     public void createGameListMsg(Game[] activeGames) {
         TYPE = GAME_LIST;
         MSG = serialize(activeGames);
@@ -109,13 +128,17 @@ public class Message {
         TYPE = GAME_STATE;
         MSG = serialize(gameState);
     }
-//    public static Message createGameMsg(Game game) {return parseMessage(GAME, game);}
+    public void createGameMsg(Game game) {
+        TYPE = GAME;
+        MSG = serialize(game);
+    }
 //    public static Message createHandDealtMsg(Hand handDealt) {return parseMessage(HAND_DEALT, handDealt);}
 
     //******************* STATUS CHECKING FUNCTIONS ***********
     public boolean isGameState() {return TYPE == GAME_STATE;}
     public boolean isGame() {return TYPE == GAME;}
     public boolean isHandDealt() {return TYPE == HAND_DEALT;}
+    public boolean isMaxBid() {return TYPE == MAX_BID;}
     public boolean isPlayerProfile() {return TYPE == PLAYER_PROFILE;}
     public boolean isGameStatus() {return TYPE == GAME_STATUS;}
     public boolean gameIsStarting() {return MSG.equals(GAME_STARTING);}

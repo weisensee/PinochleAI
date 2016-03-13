@@ -7,9 +7,13 @@
  *     -bid ammount
  *     -meld ammounts
  *     -cards played
+ *     -current dealer
+ *     -game id
+ *
  */
 public class GameState {
     private int GAME_ID;
+    private int DEALER;
     public int BID_WINNER;
     public int BID_AMOUNT;
     public int[] MELD;
@@ -17,19 +21,19 @@ public class GameState {
     private int[] CARDS_PLAYED;
     char[] charCardsPlayed;
 
+
     // Default constructor--initializes values
     public GameState() {
+        DEALER = 0;
         GAME_ID = -1;
         BID_AMOUNT = 0;
         BID_WINNER = -1;
         MELD = new int[4];
         CARDS_PLAYED = new int[48];
-        charCardsPlayed = new char[48];
 
         // initialize played cards array
         for (int i = 0; i < 48; i++) {
             CARDS_PLAYED[i] = 0;
-            charCardsPlayed[i] = (char)-1;
         }
 
 
@@ -38,12 +42,8 @@ public class GameState {
     }
 
     // return stored char array representing the played cards
-    public String getCardsPlayed() {
-        String temp = new String();
-        for (int i = 0; i < 48; i++)
-            temp += charCardsPlayed[i];
-
-        return temp;
+    public int[] getCardsPlayed() {
+        return CARDS_PLAYED;
     }
 
     // returns game's id
@@ -118,8 +118,39 @@ public class GameState {
     }
 
 
+    public int getDealer() {return DEALER;}
+    public int update(GameState newInfo) {
+        // quit if update is null
+        if (newInfo == null) {
+            System.err.println("ERROR: null game received in Game->update()");
+            return -1;
+        }
 
+        // if other values are valid, update local data
+        if (newInfo.getGameId() != GAME_ID)
+            this.GAME_ID = newInfo.getGameId();
 
+        if (newInfo.getDealer() >= 0)
+            this.DEALER = newInfo.getDealer();
 
+        if (playPosition != newInfo.getPlayPosition())
+            playPosition = newInfo.getPlayPosition();
 
+        if (newInfo.getBidWinner() != BID_WINNER)
+            this.BID_WINNER = newInfo.getBidWinner();
+
+        if (newInfo.getBid() != BID_AMOUNT)
+            this.BID_AMOUNT = newInfo.getBid();
+
+        if (newInfo.getMeld() != null)
+            this.MELD = newInfo.getMeld();
+
+        if (newInfo.getCardsPlayed() != null)
+            this.CARDS_PLAYED = newInfo.getCardsPlayed();
+
+        return 1;
+    }
+
+    public int[] getMeld() {return MELD;}
+    public int getPlayPosition() {return playPosition;}
 }
