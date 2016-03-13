@@ -148,7 +148,6 @@ public class ClientHandlerThread extends Thread {
         return PLAYER.getName() + "'s Game";
     }
 
-
     // Returns the next available game ID
     // TODO: setup a simple database to ensure game IDs are generated sequentially
     public int getNextGameId() {

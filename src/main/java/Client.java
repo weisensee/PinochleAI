@@ -16,12 +16,12 @@ public abstract class Client {
     public PlayerProfile PROFILE;               // Local players profile info
     public PlayerProfile SERVER;               // Severs connection info
     public Game GAME;                           // game data for current game
-    public List<Card> HAND;                     // Local player's hand
+    public Hand HAND;                     // Local player's hand
 
     // ::ABSTRACT FUNCTIONS::
     public abstract Card getNextPlay();                         // gets the next play from the player
     public abstract void processNewPlay(GameState currentGame); // allows the player to handle the most recent play
-    public abstract void placeMaxBid();                         // bid on hand by placing max bid
+    public abstract int getMaxBid();           // returns the clients chosen max bid
     public abstract int pickGameToJoin(ArrayList<Game> gameList);       // return the clients choice of game to join
     public abstract PlayerProfile getNameAndId();                        // sets up the global PlayerProfile info
 
@@ -131,7 +131,7 @@ public abstract class Client {
 
             // if not status message, throw error
             else {
-                System.err.println("Non-status message received in waitForReadyGame");
+                System.err.println("Non-status message received in waitForReadyGame:" + msg.toString());
                 break;
             }
         }
@@ -152,7 +152,12 @@ public abstract class Client {
         // play through tricks
         playTricks();
     }
+    // retreivs the player's max bid and sends it to the server as a message
+    private void placeMaxBid() {
+        int bid = getMaxBid();
 
+
+    }
     // Returns true if argument is a valid active game choice
     public boolean isAvailableGame(int gameChoice, ArrayList<Game> gameList) {
         // if game choice is out of gameID bounds, return false
@@ -195,15 +200,9 @@ public abstract class Client {
     public void getDealtHand() {
         // wait for server to send the game data, dealt cards, etc
         Message handDealt = SERVER.getMessage("get dealt hand");
-
+        HAND = handDealt.getHandDealt();
 
         System.out.println("Recieved Dealt Hand: " + handDealt.toString());
-
-        // convert dealt hand String to JSON
-
-
-        // Add cards to HAND list
-
     }
 
     // play through tricks

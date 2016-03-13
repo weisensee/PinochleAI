@@ -9,11 +9,11 @@ import java.util.List;
  * Stores and Manages a player's hand: a list of cards
  */
 public class Hand {
-    ArrayList<Card> cardsInHand;
+    ArrayList<Card> CARDS;
 
     // creates a new hand from one that is dealt/passed
     public Hand(List<Card> cardsDealt) {
-        cardsInHand = new ArrayList<Card>(cardsDealt);
+        CARDS = new ArrayList<Card>(cardsDealt);
     }
 
     // TODO: impement function to return string of hand for printing

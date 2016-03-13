@@ -34,7 +34,7 @@ public class Game {
         SCORES[0] = 0;
         SCORES[1] = 0;
 
-
+        HANDS = new Hand[4];
         GAMESTATE = new GameState();
     }
 
@@ -58,6 +58,7 @@ public class Game {
     public void launch() {
         // Wait for players to join
         waitForPlayers();
+        sendMsgToAllPLayers(Message.readyToPlayMsg());
 
         // If game is not over, continue
         while(readyToPlay()) {
@@ -176,8 +177,7 @@ public class Game {
             HANDS[i] = deck.getHand(i);
 
             // send dealt hands
-            Message handDealt = new Message();
-            PLAYERS[i].sendMsg(handDealt);
+            PLAYERS[i].sendMsg(Message.handDealtMsg(HANDS[i]));
         }
 
     }

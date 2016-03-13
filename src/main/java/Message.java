@@ -93,7 +93,7 @@ public class Message {
         return gson.fromJson(MSG, Game.class);
     }
 
-    // returns the GameState contained in the message
+    // returns the max bid contained in the message
     public int getMaxBid() {
         if (isMaxBid())
             return Integer.parseInt(MSG);
@@ -102,6 +102,26 @@ public class Message {
             return -1;
         }
     }
+    // returns the dealt hand contained in the message
+    public Hand getHandDealt() {
+        if (isHandDealt()) {
+            Gson gson = new Gson();
+            return gson.fromJson(MSG, Hand.class);
+        }
+        else {
+            System.err.println("ERROR: requesting hand dealt when message is not Hand type");
+            return null;
+        }
+    }
+//
+//    // parses the object and type passed and returns the Message they create
+//    private static Message parseMessage(int type, Object toSerialize) {
+//        Message toMake = new Message();
+//        toMake.setType(type);
+//        toMake.setMsg(serialize(toSerialize));
+//
+//        return toMake;
+//    }
 
     //******************* MESSAGE CREATORS ****************
     // creates Message holding a Game's status code
@@ -132,7 +152,9 @@ public class Message {
         TYPE = GAME;
         MSG = serialize(game);
     }
-//    public static Message createHandDealtMsg(Hand handDealt) {return parseMessage(HAND_DEALT, handDealt);}
+
+    public static Message handDealtMsg(Hand handDealt) {return parseMessage(HAND_DEALT, handDealt);}
+    public static Message readyToPlayMsg() {return parseMessage(GAME_STATUS, GAME_STARTING);}
 
     //******************* STATUS CHECKING FUNCTIONS ***********
     public boolean isGameState() {return TYPE == GAME_STATE;}
@@ -145,4 +167,6 @@ public class Message {
     public boolean waitingForPlayers() {return WAITING_FOR_PLAYERS == Integer.parseInt(MSG);}
     public boolean isValidJson() {// returns true if Message is a valid json message
         return MSG.length() > 0;}
+//    private void setType(int type) { TYPE = type;}
+//    private void setMsg(String msg) {MSG = msg;}
 }

@@ -20,7 +20,7 @@ public class RandomAi extends AiPlayer {
     public int pickGameToJoin(HashMap gameList) { // return the clients choice of game to join
         return 0;
     }
-    public void placeMaxBid(){}                // bid on hand by placing max bid
+    public int getMaxBid(){return 1;}                // bid on hand by placing max bid
     public int pickGameToJoin(ArrayList<Game> gameList) {   // return the clients choice of game to join
         // TODO: should return the game # this player is supposed to join
         return 0;

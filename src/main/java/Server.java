@@ -20,6 +20,7 @@ public class Server {
         GameServer.run(9999);
         // could be good to have this editable on the commandline
         // with: Integer.parseInt(args[1])
+
     }
 
     // Start new Server with the given arguments

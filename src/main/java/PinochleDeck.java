@@ -21,7 +21,7 @@ public class PinochleDeck {
 
         // let the Card class setup each card in the deck
         for (int i = 0; i < 48; i++)
-            cards.set(i, new Card(i));
+            cards.add(i, new Card(i % 24));
 
     }
 
@@ -42,7 +42,8 @@ public class PinochleDeck {
         System.out.println("Printing sublist: ");
         for (Card c : temp)
             System.out.print(" " + c.getString());
-
+        for (Card c : temp)
+            System.out.print(" " + c.getInt());
         return new Hand(temp);
 
     }

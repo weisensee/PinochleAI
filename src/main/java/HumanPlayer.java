@@ -1,5 +1,6 @@
 import com.google.gson.Gson;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -51,7 +52,14 @@ public class HumanPlayer extends Client {
      }
 
      // bid on hand by placing max bid
-     public void placeMaxBid() {
+     public int getMaxBid() {
+        System.out.println("Enter your max bid: ");
+         try { return System.in.read();
+         } catch (IOException e) {
+             System.err.println("ERROR reading max bid:" + e);
+             e.printStackTrace();
+             return -1;
+         }
 
      }
 
