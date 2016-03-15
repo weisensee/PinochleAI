@@ -161,7 +161,7 @@ public class Message {
     public boolean isMaxBid() {return TYPE == MAX_BID;}
     public boolean isPlayerProfile() {return TYPE == PLAYER_PROFILE;}
     public boolean isGameStatus() {return TYPE == GAME_STATUS;}
-    public boolean gameIsStarting() {return MSG.equals(GAME_STARTING);}
+    public boolean gameIsStarting() {return Integer.parseInt(MSG) == (GAME_STARTING);}
     public boolean waitingForPlayers() {return WAITING_FOR_PLAYERS == Integer.parseInt(MSG);}
     public boolean isValidJson() {// returns true if Message is a valid json message
         return MSG.length() > 0;}

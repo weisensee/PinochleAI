@@ -198,7 +198,7 @@ public abstract class Client {
         Message handDealt = SERVER.getMessage("get dealt hand");
         HAND = handDealt.getHandDealt();
 
-        System.out.println("Recieved Dealt Hand: " + handDealt.toString());
+        System.out.println("Recieved Dealt Hand: " + HAND.toString());
     }
 
     // play through tricks

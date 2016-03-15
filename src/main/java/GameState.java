@@ -19,7 +19,6 @@ public class GameState {
     public int[] MELD;
     private int playPosition;
     private int[] CARDS_PLAYED;
-    char[] charCardsPlayed;
 
 
     // Default constructor--initializes values
@@ -36,7 +35,7 @@ public class GameState {
             CARDS_PLAYED[i] = 0;
         }
 
-
+        // initialize play position to zero
         playPosition = 0;
 
     }
@@ -58,7 +57,6 @@ public class GameState {
     // add played card to played list and increment counter
     public void playCard(Card toPlay) {
         CARDS_PLAYED[playPosition] = toPlay.getInt();
-        charCardsPlayed[playPosition] = toPlay.getChar();
         playPosition++;
     }
 
@@ -119,6 +117,9 @@ public class GameState {
 
 
     public int getDealer() {return DEALER;}
+
+    // updates the GameState's data with new data only if said data exists/is valid
+    // returns -1 if null gameState is passed in
     public int update(GameState newInfo) {
         // quit if update is null
         if (newInfo == null) {
@@ -153,4 +154,5 @@ public class GameState {
 
     public int[] getMeld() {return MELD;}
     public int getPlayPosition() {return playPosition;}
+    public String print() { return this.toString();} // TODO: implement a more elequent display (java gui?)
 }
