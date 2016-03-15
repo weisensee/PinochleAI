@@ -2,9 +2,7 @@
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
-import java.net.Socket;
 import java.util.ArrayList;
 
 /**
@@ -13,7 +11,7 @@ import java.util.ArrayList;
  *
  * Stores and parses messages between server and client
  *
- * Implements an abstraction for sending messages as JSON objects:
+ * Implements an abstraction for sending messages as JSON objects between Client and Server
  *      joined game
  *      end game
  *      waiting for players

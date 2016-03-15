@@ -6,6 +6,7 @@ import java.util.HashMap;
  * Lucas Weisensee
  *
  * RandomAi is a rudimentary AI which picks randomly from the cards available for each play.
+ * Currently implemented for testing the server once human player testing is done
  */
 public class RandomAi extends AiPlayer {
     private int num;    // random num to generate from

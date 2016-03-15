@@ -9,18 +9,8 @@ import java.util.*;
  *
  * HumanPlayer is a manual player that plays through the console
  *     -players can play other people or AI in the same way an AI can
+ *     -currently serving to manually test the Server before connecting up AIs for play
  */
-
- /** ::GLOBAL VARIABLES::
-public static int DEFAULT_PORT = 9999;      // default port for Server
-public int PORT_NUMBER;                     // Port number to listen for new connections on
-public String SERVER_ADDRESS = "0.0.0.0";   // default server address, localhost
-public Socket SERVER_SOCKET;                       // game server's socket
-public Game PINOCHLE_GAME;                  // game data for current game
-public DataInputStream inputStream;         // server socket reading stream
-public DataOutputStream outputStream;       // server socket writing stream
-
-*/
 public class HumanPlayer extends Client {
 
     // Main class: starts the program with given arguments
@@ -33,8 +23,8 @@ public class HumanPlayer extends Client {
      public PlayerProfile getNameAndId() {
          // Query player for name, echo what they input
          System.out.println("Please enter the name you'd like to use below:");
-         Scanner cin = new Scanner(System.in);
-         PROFILE.setName(cin.nextLine());       // update plater's profile data
+         Scanner in = new Scanner(System.in);
+         PROFILE.setName(in.nextLine());       // update plater's profile data
          System.out.println("New name saved: " + PROFILE.getName());
 
          // Pick a userID for the current player
@@ -46,27 +36,23 @@ public class HumanPlayer extends Client {
 
 
      // allows the player to handle the most recent play
-     // Updates the player's information with the newest play
+     // Updates the player's information with the newest play by printing to console
      public void processNewPlay(GameState currentGame) {
-
+        System.out.print(currentGame.print());
      }
 
      // bid on hand by placing max bid
+    // returns -1 on failure or IOException
      public int getMaxBid() {
         System.out.println("Enter your max bid: ");
-         try { return System.in.read();
+         try {
+             return System.in.read();
          } catch (IOException e) {
              System.err.println("ERROR reading max bid:" + e);
              e.printStackTrace();
              return -1;
          }
 
-     }
-
-     // TODO: allow player to choose meld to play
-     // play meld from hand for points
-     public void playMeld() {
-        // TODO: setup to auto-meld until custom melding is an option
      }
 
      // return the clients choice of game to join
@@ -77,9 +63,7 @@ public class HumanPlayer extends Client {
          // Print out game choices
          System.out.println("\t0\t\tNEW GAME");   // always show the option to create a new game
          for (int i = 0; i < gameCount && gameList.get(i) != null; i++) {
-//             Gson gson = new Gson();
-//             Game current = gson.fromJson(gameList.get(i), Game.class);
-             System.out.println("\t" + ((Game)gameList.get(i)).getId() + "\t" + gameList.get(i).getName());   // always show the option to create a new game
+             System.out.println("\t" + (gameList.get(i)).getId() + "\t" + gameList.get(i).getName());   // always show the option to create a new game
          }
 
          int answer = -1;
@@ -97,6 +81,11 @@ public class HumanPlayer extends Client {
          return answer;
      }
 
+    // TODO: allow player to choose meld to play
+    // play meld from hand for points
+    public void playMeld() {
+        // TODO: setup to auto-meld until custom melding is easier
+    }
     // returns the player's next play
     public Card getNextPlay() {
         // TODO: show the players hand, ask them which card they want to play

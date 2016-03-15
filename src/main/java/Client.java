@@ -9,14 +9,15 @@ import java.util.*;
  * Lucas Weisensee
  *
  * Connects to AiServer and plays a Game
+ * Parent class for actual players: Human and AI
  */
 
 public abstract class Client {
     // ::GLOBAL VARIABLES::
-    public PlayerProfile PROFILE;               // Local players profile info
-    public PlayerProfile SERVER;               // Severs connection info
-    public Game GAME;                           // game data for current game
-    public Hand HAND;                     // Local player's hand
+    public PlayerProfile PROFILE;       // Local player's profile info
+    public PlayerProfile SERVER;        // Sever's connection info
+    public Game GAME;                   // game data for current game
+    public Hand HAND;                   // Local player's hand
 
     // ::ABSTRACT FUNCTIONS::
     public abstract Card getNextPlay();                         // gets the next play from the player
@@ -111,8 +112,8 @@ public abstract class Client {
         return gameChoice.getGameList();                    // extract gamelist array
     }
 
-    // Waiting room for game to be ready
-    // TODO: implement chat feature
+    // Waiting room for enough players to join the game
+    // TODO: implement chat feature for players waiting
     public void waitForReadyGame() {
         boolean ready = false;
         System.out.println("Waiting for enough players to join...");
@@ -137,8 +138,7 @@ public abstract class Client {
         }
     }
 
-    // play pinochle with current game
-    // high level
+    // plays through one round in the current game
     public void playGame() {
         // collect cards from server/dealer
         getDealtHand();
@@ -152,26 +152,35 @@ public abstract class Client {
         // play through tricks
         playTricks();
     }
-    // retreivs the player's max bid and sends it to the server as a message
+    // retrieves the player's max bid and sends it to the server as a message
     private void placeMaxBid() {
+        // get bid from player or AI
         int bid = getMaxBid();
 
+        // send "max bid" message to server
 
     }
-    // Returns true if argument is a valid active game choice
+    // Returns true if argument is a valid active game choice or new game
     public boolean isAvailableGame(int gameChoice, ArrayList<Game> gameList) {
         // if game choice is out of gameID bounds, return false
         if (0 > gameChoice)
             return false;
 
-        // check that gameList contains game with chosen I
+        // return true if 'new game' is chosen
+        if (gameChoice == 0)
+            return true;
 
-        // TODO: implement more strict check:
-        return true;
-//        return (gameList.containsValue(gameChoice));
+        // check list for chosen game
+        for(int i = 0; i < gameList.size(); i++)
+            if (gameList.get(i).getId() == gameChoice)
+                return true;
+
+        // return false if gameChoice is not an available game
+        return false;
     }
 
     // returns a new unique player ID number, a positive integer !=0
+    // temporary measure until user management is better established server-side
     // TODO: setup database for userid's to ensure no duplicates
     public int getNewId() {
         Random r = new Random();       // currently returns a randomly generated ID
@@ -180,23 +189,10 @@ public abstract class Client {
 
     // plays all available meld in player's hand
     public void playMeld() {                            // play meld from hand for points
-        // if meld can be played, play it
+        // if meld can be played, play it!
     }
 
-    // Plays the given card in the current Game
-    public void playCard(Card toPlay) {
-
-    }
-
-    public void joinGame(String toJoin) {
-
-    }
-
-    public void leaveGame() {
-    }
-
-    // TODO: review Game.java and implement dealt hand catcher here THEN TEST!
-    // collect cards from server/dealer
+    // collect cards from server/dealer, save to hand
     public void getDealtHand() {
         // wait for server to send the game data, dealt cards, etc
         Message handDealt = SERVER.getMessage("get dealt hand");

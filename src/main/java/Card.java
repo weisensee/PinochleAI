@@ -5,6 +5,8 @@
  * Card is a single card from the deck
  *     -has a suit
  *     -has a value
+ *
+ *
  */
 public class Card {
     private int value;      // this card's value
@@ -25,16 +27,9 @@ public class Card {
         return value;
     }
 
-    // return the char value of the card
-    // TODO: setup char/int conversion
-    public char getChar() {
-        return (char)value;
-    }
-
-    // TODO: return appropriate string to display card suit and value
-    // TODO: implement getSuit and getValue helper functions
     // returns the string representation of the given card
     public String getString() {return getString(value);}
+    // static wrapper method also allows string to be called from Card class when it'd not instantiated
     public static String getString(int value) {
         return getCardName(value) + getCardSuitStr(value);
     }
@@ -44,6 +39,7 @@ public class Card {
         return SUITS[value % 4];
     }
 
+    // returns the string representation of the card value passed in by argument
     public static String getCardName(int value) {
         int num = value % 6;
         switch (num) {

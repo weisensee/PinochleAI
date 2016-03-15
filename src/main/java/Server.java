@@ -13,18 +13,18 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class Server {
     // Port number for Server to listen on
-    private static int PORT_NUMBER = 9999;      // sets the DEFAULT PORT;
+    private static int PORT_NUMBER = Settings.DEFAULT_PORT;      // sets the DEFAULT PORT;
 
     public static void main(String[] args){
         Server GameServer = new Server();
-        GameServer.run(9999);
+        GameServer.run(PORT_NUMBER);
         // could be good to have this editable on the commandline
         // with: Integer.parseInt(args[1])
 
     }
 
     // Start new Server with the given arguments
-    // -- port: port number to host on
+    // argument port: port number to host on
     private void run(int port) {
         PORT_NUMBER = port; //set Server's listen port
         System.out.println("Starting Server on port:" + PORT_NUMBER);
