@@ -28,9 +28,9 @@ public class Card {
     }
 
     // returns the string representation of the given card
-    public String getString() {return getString(value);}
+    public String toString() {return toString(value);}
     // static wrapper method also allows string to be called from Card class when it'd not instantiated
-    public static String getString(int value) {
+    public static String toString(int value) {
         return getCardName(value) + getCardSuitStr(value);
     }
 
