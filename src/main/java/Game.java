@@ -18,7 +18,7 @@ public class Game {
     private String NAME;                    // this Game's name
     private int GAME_ID;                    // Game's unique ID # (> 0)
     private PlayerProfile[] PLAYERS;        // clients in this Game
-    transient private Hand[] HANDS;                   // cards each player holds
+    transient private Hand[] HANDS;                   // CARDS each player holds
     private int[] SCORES;                   // teams scores
     transient private BlockingQueue joiningGameQueue; // blocking queue of players waiting to join another game
 
@@ -62,7 +62,7 @@ public class Game {
 
         // If game is not over, continue
         while(readyToPlay()) {
-            // Deal out cards
+            // Deal out CARDS
             dealCards();
 
             // Collect bids and determine bid winner
@@ -97,8 +97,9 @@ public class Game {
                 }
             }
 
+            // TODO: implement waitOnObject(someTime) if it exists in Java
             // pause between searching for new players
-            try {Thread.sleep(10000);}catch (InterruptedException e){}
+            try {Thread.sleep(5000);}catch (InterruptedException e){}
 
             // TODO: if all players have left, close this game!!
             // if there's space left and no players in queue
@@ -161,14 +162,14 @@ public class Game {
         return true;
     }
 
-    // TODO: test that this works/is dealing out cards to players
-    // Deal out cards
+    // TODO: test that this works/is dealing out CARDS to players
+    // Deal out CARDS
     // notify players that game is starting by dealing out hands
     private void dealCards() {
-        // initialize new deck of cards
+        // initialize new deck of CARDS
         PinochleDeck deck = new PinochleDeck();
 
-        // shuffle and deal cards locally
+        // shuffle and deal CARDS locally
         deck.shuffle();
 
         // save then send each player's hand

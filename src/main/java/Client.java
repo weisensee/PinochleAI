@@ -140,7 +140,7 @@ public abstract class Client {
 
     // plays through one round in the current game
     public void playGame() {
-        // collect cards from server/dealer
+        // collect CARDS from server/dealer
         getDealtHand();
 
         // bid on hand by placing max bid
@@ -192,9 +192,9 @@ public abstract class Client {
         // if meld can be played, play it!
     }
 
-    // collect cards from server/dealer, save to hand
+    // collect CARDS from server/dealer, save to hand
     public void getDealtHand() {
-        // wait for server to send the game data, dealt cards, etc
+        // wait for server to send the game data, dealt CARDS, etc
         Message handDealt = SERVER.getMessage("get dealt hand");
         HAND = handDealt.getHandDealt();
 

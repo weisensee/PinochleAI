@@ -6,7 +6,7 @@ import java.util.List;
  * Hand.java
  * Luke Weisensee
  *
- * Stores and Manages a player's hand: a list of cards
+ * Stores and Manages a player's hand: a list of CARDS
  */
 public class Hand {
     ArrayList<Card> CARDS;
@@ -17,7 +17,7 @@ public class Hand {
     }
 
 
-    // simple print of cards in hand
+    // simple print of CARDS in hand
     @Override
     public String toString() {
         StringBuilder handString = new StringBuilder();

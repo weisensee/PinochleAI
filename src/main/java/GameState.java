@@ -6,7 +6,7 @@
  *     -bid winner
  *     -bid ammount
  *     -meld ammounts
- *     -cards played
+ *     -CARDS played
  *     -current dealer
  *     -game id
  *
@@ -30,7 +30,7 @@ public class GameState {
         MELD = new int[4];
         CARDS_PLAYED = new int[48];
 
-        // initialize played cards array
+        // initialize played CARDS array
         for (int i = 0; i < 48; i++) {
             CARDS_PLAYED[i] = 0;
         }
@@ -40,7 +40,7 @@ public class GameState {
 
     }
 
-    // return stored char array representing the played cards
+    // return stored char array representing the played CARDS
     public int[] getCardsPlayed() {
         return CARDS_PLAYED;
     }
@@ -70,7 +70,7 @@ public class GameState {
         return BID_WINNER;
     }
 
-    // returns the winning bid ammount
+    // returns the winning bid amount
     public int getBid() {
         return BID_AMOUNT;
     }
@@ -102,15 +102,15 @@ public class GameState {
             BID_WINNER = winner;
     }
 
-    // copy played cards into card string and array
+    // copy played CARDS into card string and array
     public void setCardsPlayed(String cardStr) {
         char[] played = cardStr.toCharArray();
         playPosition = 0;
         for (int i = 0; i < 48; i++) {
-            if (played[i] != (char)-1)  // if there is a card there (all cards are initialized to -1)
+            if (played[i] != (char)-1)  // if there is a card there (all CARDS are initialized to -1)
                 playCard(new Card(played[i]));
 
-            else    // quit when all cards have been copied
+            else    // quit when all CARDS have been copied
                 break;
         }
     }
