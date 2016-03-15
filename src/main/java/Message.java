@@ -123,16 +123,13 @@ public class Message {
 
     //******************* MESSAGE CREATORS ****************
     // creates Message holding a Game's status code
-    private void createStatusMsg(int status) {
-        TYPE = GAME_STATUS;
-        MSG = serialize(status);
-    }
-    public void createPlayerProfileMsg(PlayerProfile profile) {
-        TYPE = PLAYER_PROFILE;
-        MSG = serialize(profile);
-    }
-    public void createWaitingForPlayersMsg() {
-        createStatusMsg(WAITING_FOR_PLAYERS);
+//
+//    public void createPlayerProfileMsg(PlayerProfile profile) {
+//        TYPE = PLAYER_PROFILE;
+//        MSG = serialize(profile);
+//    }
+    public static Message createWaitingForPlayersMsg() {
+        return createStatusMsg(WAITING_FOR_PLAYERS);
     }
     public void createMaxBidMsg(int maxBid) {
         TYPE = MAX_BID;
@@ -151,6 +148,8 @@ public class Message {
         MSG = serialize(game);
     }
 
+    public static Message createPlayerProfileMsg(PlayerProfile profile) {return parseMessage(PLAYER_PROFILE, profile);}
+    private static Message createStatusMsg(int status) {return parseMessage(GAME_STATUS, status);}
     public static Message handDealtMsg(Hand handDealt) {return parseMessage(HAND_DEALT, handDealt);}
     public static Message readyToPlayMsg() {return parseMessage(GAME_STATUS, GAME_STARTING);}
 

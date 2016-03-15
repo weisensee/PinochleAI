@@ -55,9 +55,11 @@ public abstract class Client {
 
     // logs the player into the server
     private void loginToServer(PlayerProfile newPlayer) {
-        Message toSend = new Message();
-        toSend.createPlayerProfileMsg(newPlayer);
-        SERVER.sendMsg(toSend);
+        // TODO: remove old code after testing:
+//        Message toSend = new Message();
+//        toSend.createPlayerProfileMsg(newPlayer);
+//        SERVER.sendMsg(toSend);
+        SERVER.sendMsg(Message.createPlayerProfileMsg(newPlayer));
     }
 
     // Initiates the global settings and variables then sets up the connection to server
@@ -86,9 +88,10 @@ public abstract class Client {
         GAME.setId(PROFILE.getGameId());
 
         // Send PROFILE Message object as JSON string to server
-        Message toSend = new Message();
-        toSend.createPlayerProfileMsg(PROFILE);
-        SERVER.sendMsg(toSend);
+        // TODO: remove outdate code
+//        Message toSend = new Message();
+//        toSend.createPlayerProfileMsg(PROFILE);
+        SERVER.sendMsg(Message.createPlayerProfileMsg(PROFILE));
 
         // verify game is joined a GameState from newly joined game
         Message gameJoinedMsg = SERVER.getMessage("waiting for game joined confirmation");
@@ -171,9 +174,12 @@ public abstract class Client {
             return true;
 
         // check list for chosen game
-        for(int i = 0; i < gameList.size(); i++)
+        for(int i = 0; i < gameList.size(); i++) {
+            if (gameList.get(i) == null)
+                break;
             if (gameList.get(i).getId() == gameChoice)
                 return true;
+        }
 
         // return false if gameChoice is not an available game
         return false;
@@ -198,7 +204,7 @@ public abstract class Client {
         Message handDealt = SERVER.getMessage("get dealt hand");
         HAND = handDealt.getHandDealt();
 
-        System.out.println("Recieved Dealt Hand: " + HAND.toString());
+        System.out.println("\nRecieved Dealt Hand: " + HAND.toString());
     }
 
     // play through tricks

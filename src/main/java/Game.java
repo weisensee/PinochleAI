@@ -103,9 +103,7 @@ public class Game {
 
             // TODO: if all players have left, close this game!!
             // if there's space left and no players in queue
-            Message toSend = new Message();
-            toSend.createWaitingForPlayersMsg();
-            sendMsgToAllPLayers(toSend); // tell active players we're waiting
+            sendMsgToAllPLayers(Message.createWaitingForPlayersMsg()); // tell active players we're waiting
         }
     }
 
