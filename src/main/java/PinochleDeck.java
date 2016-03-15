@@ -15,13 +15,14 @@ import java.util.List;
 public class PinochleDeck {
     ArrayList<Card> cards;
 
+    // Default constructor
     public PinochleDeck() {
         // initialize array of cards
         cards = new ArrayList<Card>(48);
 
         // let the Card class setup each card in the deck
         for (int i = 0; i < 48; i++)
-            cards.add(i, new Card(i % 24));
+            cards.add(i, new Card(i % 24)); // %24 because there's two of each card in Pinochle
 
     }
 
@@ -35,15 +36,7 @@ public class PinochleDeck {
         int start = num * 12;
         int end = start + 12;
 
-        // TODO: test and remove debug statement
-        System.out.println("DEBUG: getHand in PinochleDeck passed:" + num + " retrieving cards from: " + start + " to " + end);
         List<Card> temp = cards.subList(start, end);
-
-        System.out.println("Printing sublist: ");
-        for (Card c : temp)
-            System.out.print(" " + c.getString());
-        for (Card c : temp)
-            System.out.print(" " + c.getInt());
         return new Hand(temp);
 
     }

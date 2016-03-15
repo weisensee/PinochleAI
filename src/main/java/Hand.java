@@ -16,6 +16,14 @@ public class Hand {
         CARDS = new ArrayList<Card>(cardsDealt);
     }
 
-    // TODO: impement function to return string of hand for printing
+
+    // simple print of cards in hand
+    @Override
+    public String toString() {
+        StringBuilder handString = new StringBuilder();
+        for (Card c : CARDS)
+            handString.append(" " + c.toString());
+        return handString.toString();
+    }
 
 }
